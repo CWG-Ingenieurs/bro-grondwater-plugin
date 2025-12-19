@@ -9,7 +9,7 @@ A QGIS plugin for retrieving and analyzing BRO (Basisregistratie Ondergrond) gro
 ## Features
 
 - **Retrieve Wells**: Automatically retrieve BRO groundwater monitoring well locations for the current map extent
-- **Fast Data Access**: Uses Hydropandas DEV version with `brodata` engine for optimal performance
+- **Fast Data Access**: Uses Hydropandas library for efficient BRO data retrieval
 - **Depth Filtering**: Filter wells based on filter depth (top_filter)
 - **Data Visualization**: Plot groundwater measurements for selected wells
 - **Excel Export**: Export well metadata and measurements to Excel format
@@ -35,11 +35,8 @@ A QGIS plugin for retrieving and analyzing BRO (Basisregistratie Ondergrond) gro
 ```bash
 # Open OSGeo4W Shell (Windows) or QGIS Python Console
 
-# Install Hydropandas DEV version with brodata engine
-pip install git+https://github.com/ArtesiaWater/hydropandas.git
-
-# Install other dependencies
-pip install pandas openpyxl matplotlib
+# Install all dependencies
+pip install hydropandas pandas openpyxl matplotlib
 ```
 
 4. Restart QGIS
@@ -96,7 +93,7 @@ Example style features:
 
 ### Data Source
 - **BRO (Basisregistratie Ondergrond)**: Dutch national subsurface registry
-- **API Access**: Via Hydropandas library with `brodata` engine
+- **API Access**: Via Hydropandas library
 
 ### Coordinate Systems
 - Input: Current QGIS map CRS (automatically transformed)
@@ -104,16 +101,15 @@ Example style features:
 - Output Layer: RD New (EPSG:28992)
 
 ### Performance
-- Uses optimized `brodata` engine for faster retrieval
 - Typical retrieval time: 10-30 seconds depending on extent and number of wells
 - Progress bar shows retrieval status
 
 ## Troubleshooting
 
 ### "Hydropandas is not installed"
-Make sure you installed the DEV version:
+Install hydropandas:
 ```bash
-pip install git+https://github.com/ArtesiaWater/hydropandas.git
+pip install hydropandas
 ```
 
 ### "No monitoring wells found"
@@ -122,14 +118,13 @@ pip install git+https://github.com/ArtesiaWater/hydropandas.git
 - Try a larger extent
 
 ### "Error retrieving data from BRO"
-- Verify you have the DEV version of Hydropandas
 - Check BRO service status
 - Ensure internet connection is working
 
 ### Import Errors
 Install missing packages in QGIS Python environment:
 ```bash
-pip install pandas openpyxl matplotlib
+pip install hydropandas pandas openpyxl matplotlib
 ```
 
 ## Credits

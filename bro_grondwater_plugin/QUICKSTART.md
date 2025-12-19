@@ -19,12 +19,7 @@ Open QGIS Python Console (`Plugins` → `Python Console`) and paste:
 import subprocess, sys
 
 # Install all dependencies at once
-packages = [
-    'git+https://github.com/ArtesiaWater/hydropandas.git',
-    'pandas',
-    'openpyxl', 
-    'matplotlib'
-]
+packages = ['hydropandas', 'pandas', 'openpyxl', 'matplotlib']
 
 for package in packages:
     print(f"Installing {package}...")

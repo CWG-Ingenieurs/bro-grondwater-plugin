@@ -188,13 +188,21 @@ except Exception as e:
 ### Hydropandas Integration
 
 ```python
-# Use brodata engine for performance
-obs_collection = hpd.GroundwaterObs.from_bro(
-    extent=extent_tuple,  # (xmin, ymin, xmax, ymax) in WGS84
-    tmin=None,            # All dates
-    tmax=None,
-    engine='brodata'      # Fast engine
-)
+# Try brodata engine first (faster), fall back to default if not available
+try:
+    obs_collection = hpd.GroundwaterObs.from_bro(
+        extent=extent_tuple,  # (xmin, ymin, xmax, ymax) in WGS84
+        tmin=None,            # All dates
+        tmax=None,
+        engine='brodata'      # Fast engine (if available)
+    )
+except TypeError:
+    # brodata engine not available, use default
+    obs_collection = hpd.GroundwaterObs.from_bro(
+        extent=extent_tuple,
+        tmin=None,
+        tmax=None
+    )
 ```
 
 **Key Classes**:
@@ -344,7 +352,7 @@ plugin = iface.plugins['bro_grondwater_plugin']
 ### Required
 - **QGIS**: 3.0+
 - **Python**: 3.7+
-- **hydropandas**: DEV version with brodata
+- **hydropandas**: BRO data access (brodata engine used if available)
 - **pandas**: Data structures
 - **matplotlib**: Plotting
 - **openpyxl**: Excel writing

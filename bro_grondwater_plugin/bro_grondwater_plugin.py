@@ -137,7 +137,7 @@ class BROGrondwaterPlugin:
                     self.dlg,
                     "Import Error",
                     "Hydropandas is not installed. Please install it using:\n"
-                    "pip install hydropandas[brodata]"
+                    "pip install hydropandas"
                 )
                 return
             
@@ -169,22 +169,30 @@ class BROGrondwaterPlugin:
             )
             
             self.dlg.progressBar.setValue(30)
-            
-            # Retrieve observations using hydropandas with brodata engine
+
+            # Retrieve observations using hydropandas
+            # Try brodata engine first (faster), fall back to default if not available
             try:
-                obs_collection = hpd.GroundwaterObs.from_bro(
-                    extent=extent_tuple,
-                    tmin=None,
-                    tmax=None,
-                    engine='brodata'  # Use the faster brodata engine
-                )
+                try:
+                    obs_collection = hpd.GroundwaterObs.from_bro(
+                        extent=extent_tuple,
+                        tmin=None,
+                        tmax=None,
+                        engine='brodata'
+                    )
+                except TypeError:
+                    # brodata engine not available, use default
+                    obs_collection = hpd.GroundwaterObs.from_bro(
+                        extent=extent_tuple,
+                        tmin=None,
+                        tmax=None
+                    )
             except Exception as e:
                 QMessageBox.warning(
                     self.dlg,
                     "Retrieval Error",
                     f"Error retrieving data from BRO:\n{str(e)}\n\n"
-                    "Make sure you have the DEV version of hydropandas installed:\n"
-                    "pip install git+https://github.com/ArtesiaWater/hydropandas.git"
+                    "Please check your internet connection and try again."
                 )
                 self.dlg.progressBar.setValue(0)
                 self.dlg.statusLabel.setText("Ready")

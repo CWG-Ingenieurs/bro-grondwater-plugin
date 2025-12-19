@@ -43,19 +43,12 @@ def test_plugin():
             all_ok = False
     print()
     
-    # Test 3: Check Hydropandas version and brodata support
+    # Test 3: Check Hydropandas version
     print("Test 3: Hydropandas Configuration")
     try:
         import hydropandas as hpd
         print(f"✓ Hydropandas version: {hpd.__version__ if hasattr(hpd, '__version__') else 'Unknown'}")
-        
-        # Check if brodata engine is available
-        try:
-            # Try to check for brodata availability
-            print("  Checking brodata engine support...")
-            print("  ℹ To verify brodata works, try retrieving data")
-        except Exception as e:
-            print(f"  ⚠ Could not verify brodata engine: {e}")
+        print("  ℹ Plugin will use brodata engine if available, otherwise standard method")
     except ImportError:
         print("✗ Hydropandas not available")
         all_ok = False

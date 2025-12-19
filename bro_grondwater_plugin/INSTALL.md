@@ -23,14 +23,9 @@ If you don't have QGIS installed:
    - Search for "OSGeo4W Shell" in Windows Start Menu
    - Right-click and select "Run as administrator"
 
-2. Install Hydropandas DEV version:
+2. Install dependencies:
 ```bash
-python3 -m pip install git+https://github.com/ArtesiaWater/hydropandas.git
-```
-
-3. Install other dependencies:
-```bash
-python3 -m pip install pandas openpyxl matplotlib
+python3 -m pip install hydropandas pandas openpyxl matplotlib
 ```
 
 #### Option B: Using QGIS Python Console (All Platforms)
@@ -43,13 +38,9 @@ python3 -m pip install pandas openpyxl matplotlib
 import subprocess
 import sys
 
-# Install Hydropandas DEV version
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-                      'git+https://github.com/ArtesiaWater/hydropandas.git'])
-
-# Install other dependencies
-subprocess.check_call([sys.executable, '-m', 'pip', 'install', 
-                      'pandas', 'openpyxl', 'matplotlib'])
+# Install all dependencies
+subprocess.check_call([sys.executable, '-m', 'pip', 'install',
+                      'hydropandas', 'pandas', 'openpyxl', 'matplotlib'])
 ```
 
 #### Option C: Using Terminal/Command Prompt (macOS/Linux)
@@ -61,12 +52,10 @@ subprocess.check_call([sys.executable, '-m', 'pip', 'install',
 2. Install dependencies:
 ```bash
 # macOS example
-/Applications/QGIS.app/Contents/MacOS/bin/python3 -m pip install git+https://github.com/ArtesiaWater/hydropandas.git
-/Applications/QGIS.app/Contents/MacOS/bin/python3 -m pip install pandas openpyxl matplotlib
+/Applications/QGIS.app/Contents/MacOS/bin/python3 -m pip install hydropandas pandas openpyxl matplotlib
 
 # Linux example
-python3 -m pip install git+https://github.com/ArtesiaWater/hydropandas.git
-python3 -m pip install pandas openpyxl matplotlib
+python3 -m pip install hydropandas pandas openpyxl matplotlib
 ```
 
 ### 3. Install the Plugin
@@ -156,12 +145,12 @@ python3 -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted
 3. Check QGIS Plugin Manager for error messages
 4. Look in QGIS logs: `Settings` → `Options` → `Message Log`
 
-### Hydropandas version issues
+### Hydropandas issues
 
-Make sure you have the DEV version:
+Reinstall hydropandas:
 ```bash
 python3 -m pip uninstall hydropandas
-python3 -m pip install git+https://github.com/ArtesiaWater/hydropandas.git
+python3 -m pip install hydropandas
 ```
 
 ### Testing Installation

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the BRO Grondwater Tools plugin will be documented in this file.
+All notable changes to the BRO Grondwater Plugin will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
@@ -15,11 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced plotting options (multiple y-axes, custom date ranges)
 - Integration with other BRO datasets
 
-## [1.0.0] - 2024-12-18
+## [0.1] - 2024-12-18
 
 ### Added
 - Initial release
-- Extent-based well retrieval using Hydropandas with brodata engine
+- Extent-based well retrieval using Hydropandas (with brodata engine if available)
 - Automatic layer creation with RD coordinates (EPSG:28992)
 - Depth filtering by top_filter attribute
 - Interactive plot visualization using matplotlib
@@ -40,7 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Technical
 - Compatible with QGIS 3.0+
-- Uses Hydropandas DEV version with brodata engine
+- Uses Hydropandas with brodata engine fallback (tries faster engine first)
 - Memory-based vector layer
 - Support for multiple well selection
 - Error handling and user feedback

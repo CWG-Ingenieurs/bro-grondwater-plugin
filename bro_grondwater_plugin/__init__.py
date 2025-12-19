@@ -14,7 +14,7 @@ def check_and_install_dependencies():
         'pandas': 'pandas>=1.3.0',
         'openpyxl': 'openpyxl>=3.0.0',
         'matplotlib': 'matplotlib>=3.3.0',
-        'hydropandas': 'git+https://github.com/ArtesiaWater/hydropandas.git@dev',
+        'hydropandas': 'hydropandas',
     }
 
     missing = []

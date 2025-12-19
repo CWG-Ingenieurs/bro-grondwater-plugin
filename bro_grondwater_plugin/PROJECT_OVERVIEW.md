@@ -12,7 +12,7 @@ BRO Grondwater Plugin is a QGIS plugin that provides seamless access to Dutch gr
 ## Key Features
 
 ✅ **Extent-Based Retrieval**: Automatically fetch wells within current map view  
-✅ **Fast Data Access**: Utilizes Hydropandas DEV with optimized brodata engine  
+✅ **Fast Data Access**: Utilizes Hydropandas library for efficient BRO data retrieval  
 ✅ **Smart Filtering**: Filter wells by depth (top_filter attribute)  
 ✅ **Data Visualization**: Interactive time series plots with matplotlib  
 ✅ **Excel Export**: Comprehensive export with metadata and measurements  
@@ -147,8 +147,7 @@ Excel file created with all data
 
 1. **Install Dependencies**
    ```bash
-   pip install git+https://github.com/ArtesiaWater/hydropandas.git
-   pip install pandas openpyxl matplotlib
+   pip install hydropandas pandas openpyxl matplotlib
    ```
 
 2. **Install Plugin**
