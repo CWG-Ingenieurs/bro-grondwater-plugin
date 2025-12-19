@@ -1,7 +1,8 @@
 [general]
 name=BRO Grondwater Plugin
-qgisMinimumVersion=3.0
+qgisMinimumVersion=3.4
 description=Retrieve and analyze BRO groundwater monitoring well data using Hydropandas
+pip_dependencies=pandas>=1.3.0,openpyxl>=3.0.0,matplotlib>=3.3.0,hydropandas
 version=0.1
 author=CWG Ingenieurs b.v.
 email=info@cwgi.nl
