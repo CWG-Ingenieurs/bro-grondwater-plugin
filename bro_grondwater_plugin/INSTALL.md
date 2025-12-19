@@ -208,7 +208,7 @@ If you encounter issues:
 1. Check the [README.md](README.md) for usage instructions
 2. Review error messages in QGIS Message Log
 3. Verify all dependencies are installed correctly
-4. Contact CWGI: info@cwgi.nl
+4. Contact CWG Ingenieurs b.v.: info@cwgi.nl
 
 ## Next Steps
 

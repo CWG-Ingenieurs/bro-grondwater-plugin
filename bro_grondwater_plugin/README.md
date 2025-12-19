@@ -134,7 +134,7 @@ pip install pandas openpyxl matplotlib
 
 ## Credits
 
-- **Developed by**: CWGI
+- **Developed by**: CWG Ingenieurs b.v.
 - **Powered by**: [Hydropandas](https://github.com/ArtesiaWater/hydropandas) (Artesia)
 - **Data Source**: [BRO](https://www.broloket.nl/) (Basisregistratie Ondergrond)
 
@@ -148,7 +148,7 @@ MIT License - See LICENSE file for details
 
 ## Contributing
 
-This is a private repository. For bug reports or feature requests, please contact CWGI.
+This is a private repository. For bug reports or feature requests, please contact CWG Ingenieurs b.v.
 
 ## Version History
 
@@ -162,7 +162,7 @@ This is a private repository. For bug reports or feature requests, please contac
 
 ## Contact
 
-**CWGI**
+**CWG Ingenieurs b.v.**
 - Website: [www.cwgi.nl](https://www.cwgi.nl)
 - Email: info@cwgi.nl
 

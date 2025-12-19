@@ -3,7 +3,7 @@ name=BRO Grondwater Plugin
 qgisMinimumVersion=3.0
 description=Retrieve and analyze BRO groundwater monitoring well data using Hydropandas
 version=0.1
-author=CWGI
+author=CWG Ingenieurs b.v.
 email=info@cwgi.nl
 
 about=This plugin retrieves BRO groundwater monitoring well locations and measurements using Hydropandas. Features include: extent-based well retrieval, depth filtering, measurement visualization, and Excel export. Powered by Hydropandas (Artesia).

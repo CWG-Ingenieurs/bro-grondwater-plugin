@@ -4,7 +4,7 @@ Thank you for your interest in contributing to BRO Grondwater Plugin!
 
 ## Development Status
 
-This is currently a private repository maintained by CWGI. We may open it for public contributions in the future.
+This is currently a private repository maintained by CWG Ingenieurs b.v. We may open it for public contributions in the future.
 
 ## Reporting Issues
 
@@ -97,7 +97,7 @@ Before submitting changes:
 
 ## Code Review
 
-All contributions will be reviewed by CWGI before merging.
+All contributions will be reviewed by CWG Ingenieurs b.v. before merging.
 
 ## Areas for Contribution
 

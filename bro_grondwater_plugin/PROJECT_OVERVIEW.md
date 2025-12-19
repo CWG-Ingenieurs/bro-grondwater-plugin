@@ -1,6 +1,6 @@
 # BRO Grondwater Plugin - Project Overview
 
-**Developer**: CWGI
+**Developer**: CWG Ingenieurs b.v.
 **Version**: 0.1
 **Date**: December 2024
 **License**: MIT
@@ -193,7 +193,7 @@ git push -u origin main
 
 ## Branding & Credits
 
-### CWGI Branding
+### CWG Ingenieurs b.v. Branding
 - Logo/name in UI header
 - Attribution in all exports
 - Contact info in documentation
@@ -235,7 +235,7 @@ GitHub Issues: Create using bug_report.md template
 GitHub Issues: Create using feature_request.md template
 
 ### Direct Contact
-**CWGI**
+**CWG Ingenieurs b.v.**
 Email: info@cwgi.nl
 Website: https://www.cwgi.nl
 
@@ -319,7 +319,7 @@ BRO data subject to BRO terms of use
 ## Contact & Resources
 
 ### Development Team
-**CWGI**
+**CWG Ingenieurs b.v.**
 Hydrogeological engineering and consulting
 
 ### Related Links

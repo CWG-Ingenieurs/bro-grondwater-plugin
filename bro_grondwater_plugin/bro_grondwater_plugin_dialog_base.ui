@@ -23,7 +23,7 @@
       <item>
        <widget class="QLabel" name="labelLogo">
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:16pt; font-weight:600; color:#0066cc;"&gt;BRO Grondwater Plugin&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:10pt; color:#666666;"&gt;CWGI&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:16pt; font-weight:600; color:#0066cc;"&gt;BRO Grondwater Plugin&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:10pt; color:#666666;"&gt;CWG Ingenieurs b.v.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -62,13 +62,13 @@
    <item>
     <widget class="QGroupBox" name="groupBoxFilter">
      <property name="title">
-      <string>2. Filter by Depth</string>
+      <string>2. Filter by Depth (m NAP)</string>
      </property>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="0">
        <widget class="QLabel" name="label_2">
         <property name="text">
-         <string>Min Depth (m):</string>
+         <string>Min Depth (m NAP):</string>
         </property>
        </widget>
       </item>
@@ -88,7 +88,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
-         <string>Max Depth (m):</string>
+         <string>Max Depth (m NAP):</string>
         </property>
        </widget>
       </item>

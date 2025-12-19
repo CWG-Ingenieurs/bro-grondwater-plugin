@@ -470,7 +470,7 @@ class BROGrondwaterPlugin:
                     'Information': [
                         'BRO Grondwater Plugin',
                         'Version 0.1',
-                        'Developed by: CWGI',
+                        'Developed by: CWG Ingenieurs b.v.',
                         '',
                         'Powered by Hydropandas (Artesia)',
                         'Data source: BRO (Basisregistratie Ondergrond)',
