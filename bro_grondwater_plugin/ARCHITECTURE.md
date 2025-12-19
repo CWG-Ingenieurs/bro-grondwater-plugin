@@ -1,15 +1,15 @@
 # Plugin Architecture
 
-Technical documentation for developers working on BRO Grondwater Tools.
+Technical documentation for developers working on BRO Grondwater Plugin.
 
 ## Directory Structure
 
 ```
-bro_groundwater_tools/
+bro_grondwater_plugin/
 ├── __init__.py                          # Plugin entry point
-├── bro_groundwater_tools.py             # Main plugin class
-├── bro_groundwater_tools_dialog.py      # Dialog wrapper
-├── bro_groundwater_tools_dialog_base.ui # Qt Designer UI file
+├── bro_grondwater_plugin.py             # Main plugin class
+├── bro_grondwater_plugin_dialog.py      # Dialog wrapper
+├── bro_grondwater_plugin_dialog_base.ui # Qt Designer UI file
 ├── metadata.txt                         # Plugin metadata
 ├── icon.png                             # Plugin icon
 ├── resources.qrc                        # Qt resources file
@@ -36,15 +36,15 @@ bro_groundwater_tools/
 
 ```python
 def classFactory(iface):
-    from .bro_groundwater_tools import BROGroundwaterTools
-    return BROGroundwaterTools(iface)
+    from .bro_grondwater_plugin import BROGrondwaterPlugin
+    return BROGrondwaterPlugin(iface)
 ```
 
 - Called by QGIS when plugin is loaded
 - Returns plugin instance
 - Receives QGIS interface object
 
-### 2. Main Plugin Class (`bro_groundwater_tools.py`)
+### 2. Main Plugin Class (`bro_grondwater_plugin.py`)
 
 **Purpose**: Core plugin logic and QGIS integration
 
@@ -65,7 +65,7 @@ def classFactory(iface):
 - `matplotlib`: Plotting
 - `pandas`, `openpyxl`: Excel export
 
-### 3. Dialog Class (`bro_groundwater_tools_dialog.py`)
+### 3. Dialog Class (`bro_grondwater_plugin_dialog.py`)
 
 **Purpose**: Manage plugin dialog window
 
@@ -76,7 +76,7 @@ def classFactory(iface):
 
 **Pattern**: Loads UI dynamically using `uic.loadUiType()`
 
-### 4. UI File (`bro_groundwater_tools_dialog_base.ui`)
+### 4. UI File (`bro_grondwater_plugin_dialog_base.ui`)
 
 **Purpose**: Define user interface layout
 
@@ -159,7 +159,7 @@ Save and close file
 Dialog is created once and reused:
 ```python
 if self.dlg is None:
-    self.dlg = BROGroundwaterToolsDialog()
+    self.dlg = BROGrondwaterPluginDialog()
 ```
 
 ### Signal-Slot Pattern
@@ -334,8 +334,8 @@ Access via: `Plugins` → `Python Console`
 
 Test code:
 ```python
-from bro_groundwater_tools import BROGroundwaterTools
-plugin = iface.plugins['bro_groundwater_tools']
+from bro_grondwater_plugin import BROGrondwaterPlugin
+plugin = iface.plugins['bro_grondwater_plugin']
 # Test methods
 ```
 
@@ -426,4 +426,4 @@ MIT License - See [LICENSE](LICENSE) file.
 ---
 
 **For questions or technical support:**
-Contact: info@cwg-ingenieurs.nl
+Contact: info@cwgi.nl

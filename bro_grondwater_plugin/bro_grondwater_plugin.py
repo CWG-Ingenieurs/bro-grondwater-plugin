@@ -1,5 +1,5 @@
 """
-BRO Grondwater Tools - Main Plugin
+BRO Grondwater Plugin - Main Plugin
 """
 
 import os
@@ -10,11 +10,11 @@ from qgis.core import (QgsProject, QgsVectorLayer, QgsFeature, QgsGeometry,
                        QgsPointXY, QgsField, QgsCoordinateReferenceSystem,
                        QgsCoordinateTransform, QgsRectangle)
 from qgis.PyQt.QtCore import QVariant
-from .bro_groundwater_tools_dialog import BROGroundwaterToolsDialog
+from .bro_grondwater_plugin_dialog import BROGrondwaterPluginDialog
 import sys
 
 
-class BROGroundwaterTools:
+class BROGrondwaterPlugin:
     """QGIS Plugin Implementation."""
 
     def __init__(self, iface):
@@ -33,7 +33,7 @@ class BROGroundwaterTools:
         locale_path = os.path.join(
             self.plugin_dir,
             'i18n',
-            'BROGroundwaterTools_{}.qm'.format(locale))
+            'BROGrondwaterPlugin_{}.qm'.format(locale))
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -42,16 +42,16 @@ class BROGroundwaterTools:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&BRO Grondwater Tools')
-        self.toolbar = self.iface.addToolBar(u'BROGroundwaterTools')
-        self.toolbar.setObjectName(u'BROGroundwaterTools')
+        self.menu = self.tr(u'&BRO Grondwater Plugin')
+        self.toolbar = self.iface.addToolBar(u'BROGrondwaterPlugin')
+        self.toolbar.setObjectName(u'BROGrondwaterPlugin')
         
         self.dlg = None
         self.wells_layer = None
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API."""
-        return QCoreApplication.translate('BROGroundwaterTools', message)
+        return QCoreApplication.translate('BROGrondwaterPlugin', message)
 
     def add_action(
         self,
@@ -95,7 +95,7 @@ class BROGroundwaterTools:
         icon_path = os.path.join(self.plugin_dir, 'icon.png')
         self.add_action(
             icon_path,
-            text=self.tr(u'BRO Grondwater Tools'),
+            text=self.tr(u'BRO Grondwater Plugin'),
             callback=self.run,
             parent=self.iface.mainWindow())
 
@@ -103,7 +103,7 @@ class BROGroundwaterTools:
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
             self.iface.removePluginMenu(
-                self.tr(u'&BRO Grondwater Tools'),
+                self.tr(u'&BRO Grondwater Plugin'),
                 action)
             self.iface.removeToolBarIcon(action)
         del self.toolbar
@@ -113,7 +113,7 @@ class BROGroundwaterTools:
         
         # Create the dialog with elements (after translation) and keep reference
         if self.dlg is None:
-            self.dlg = BROGroundwaterToolsDialog()
+            self.dlg = BROGrondwaterPluginDialog()
             
             # Connect signals
             self.dlg.btnRetrieveWells.clicked.connect(self.retrieve_wells)
@@ -468,9 +468,9 @@ class BROGroundwaterTools:
                 # Add credits and disclaimer sheet
                 credits_data = {
                     'Information': [
-                        'BRO Grondwater Tools',
-                        'Version 1.0.0',
-                        'Developed by: CWG Ingenieurs',
+                        'BRO Grondwater Plugin',
+                        'Version 0.1',
+                        'Developed by: CWGI',
                         '',
                         'Powered by Hydropandas (Artesia)',
                         'Data source: BRO (Basisregistratie Ondergrond)',

@@ -1,20 +1,20 @@
 """
-Test script for BRO Grondwater Tools plugin
+Test script for BRO Grondwater Plugin
 Run this in QGIS Python Console to verify installation
 """
 
 def test_plugin():
     """Test plugin installation and dependencies"""
-    
+
     print("=" * 50)
-    print("BRO Grondwater Tools - Installation Test")
+    print("BRO Grondwater Plugin - Installation Test")
     print("=" * 50)
     print()
     
     # Test 1: Check if plugin is loaded
     print("Test 1: Plugin Loading")
     try:
-        plugin = iface.plugins.get('bro_groundwater_tools')
+        plugin = iface.plugins.get('bro_grondwater_plugin')
         if plugin:
             print("✓ Plugin loaded successfully")
         else:
@@ -79,9 +79,9 @@ def test_plugin():
     plugin_dir = os.path.dirname(os.path.abspath(__file__))
     required_files = [
         '__init__.py',
-        'bro_groundwater_tools.py',
-        'bro_groundwater_tools_dialog.py',
-        'bro_groundwater_tools_dialog_base.ui',
+        'bro_grondwater_plugin.py',
+        'bro_grondwater_plugin_dialog.py',
+        'bro_grondwater_plugin_dialog_base.ui',
         'metadata.txt',
         'icon.png'
     ]
@@ -112,7 +112,7 @@ def test_plugin():
         print("✓ ALL TESTS PASSED")
         print()
         print("Plugin is ready to use!")
-        print("Open it from: Plugins → BRO Grondwater Tools")
+        print("Open it from: Plugins → BRO Grondwater Plugin")
     else:
         print("✗ SOME TESTS FAILED")
         print()

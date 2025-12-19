@@ -1,7 +1,7 @@
 @echo off
-REM Compile resources and UI files for the BRO Grondwater Tools plugin
+REM Compile resources and UI files for the BRO Grondwater Plugin
 
-echo Compiling BRO Grondwater Tools resources...
+echo Compiling BRO Grondwater Plugin resources...
 
 REM Compile resources (if pyrcc5 is available)
 where pyrcc5 >nul 2>nul
@@ -29,7 +29,7 @@ echo.
 echo Build complete! The plugin is ready to use.
 echo.
 echo To install:
-echo 1. Copy the 'bro_groundwater_tools' folder to your QGIS plugins directory
+echo 1. Copy the 'bro_grondwater_plugin' folder to your QGIS plugins directory
 echo 2. Restart QGIS
 echo 3. Enable the plugin in Plugins -^> Manage and Install Plugins
 echo.

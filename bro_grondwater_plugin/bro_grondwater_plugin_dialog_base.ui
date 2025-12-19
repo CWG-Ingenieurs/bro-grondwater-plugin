@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>BROGroundwaterToolsDialogBase</class>
- <widget class="QDialog" name="BROGroundwaterToolsDialogBase">
+ <class>BROGrondwaterPluginDialogBase</class>
+ <widget class="QDialog" name="BROGrondwaterPluginDialogBase">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>BRO Grondwater Tools</string>
+   <string>BRO Grondwater Plugin</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
@@ -23,7 +23,7 @@
       <item>
        <widget class="QLabel" name="labelLogo">
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:16pt; font-weight:600; color:#0066cc;"&gt;BRO Grondwater Tools&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:10pt; color:#666666;"&gt;CWG Ingenieurs&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:16pt; font-weight:600; color:#0066cc;"&gt;BRO Grondwater Plugin&lt;/span&gt;&lt;/p&gt;&lt;p align="center"&gt;&lt;span style=" font-size:10pt; color:#666666;"&gt;CWGI&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -202,7 +202,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>accepted()</signal>
-   <receiver>BROGroundwaterToolsDialogBase</receiver>
+   <receiver>BROGrondwaterPluginDialogBase</receiver>
    <slot>accept()</slot>
    <hints>
     <hint type="sourcelabel">
@@ -218,7 +218,7 @@
   <connection>
    <sender>buttonBox</sender>
    <signal>rejected()</signal>
-   <receiver>BROGroundwaterToolsDialogBase</receiver>
+   <receiver>BROGrondwaterPluginDialogBase</receiver>
    <slot>reject()</slot>
    <hints>
     <hint type="sourcelabel">

@@ -1,10 +1,10 @@
-# Contributing to BRO Grondwater Tools
+# Contributing to BRO Grondwater Plugin
 
-Thank you for your interest in contributing to BRO Grondwater Tools!
+Thank you for your interest in contributing to BRO Grondwater Plugin!
 
 ## Development Status
 
-This is currently a private repository maintained by CWG Ingenieurs. We may open it for public contributions in the future.
+This is currently a private repository maintained by CWGI. We may open it for public contributions in the future.
 
 ## Reporting Issues
 
@@ -30,17 +30,17 @@ If you encounter bugs or have feature requests:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/CWG-Ingenieurs/bro-groundwater-tools.git
-cd bro-groundwater-tools
+git clone https://github.com/CWGI/bro-grondwater-plugin.git
+cd bro-grondwater-plugin
 ```
 
 2. Create symbolic link to QGIS plugins directory:
 ```bash
 # Windows (as Administrator)
-mklink /D "C:\Users\<YourUsername>\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\bro_groundwater_tools" "path\to\cloned\repo"
+mklink /D "C:\Users\<YourUsername>\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins\bro_grondwater_plugin" "path\to\cloned\repo"
 
 # macOS/Linux
-ln -s /path/to/cloned/repo ~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/bro_groundwater_tools
+ln -s /path/to/cloned/repo ~/.local/share/QGIS/QGIS3/profiles/default/python/plugins/bro_grondwater_plugin
 ```
 
 3. Install development dependencies:
@@ -97,7 +97,7 @@ Before submitting changes:
 
 ## Code Review
 
-All contributions will be reviewed by CWG Ingenieurs before merging.
+All contributions will be reviewed by CWGI before merging.
 
 ## Areas for Contribution
 
@@ -116,7 +116,7 @@ Potential areas where contributions would be valuable:
 
 ## Questions?
 
-Contact: info@cwg-ingenieurs.nl
+Contact: info@cwgi.nl
 
 ## License
 

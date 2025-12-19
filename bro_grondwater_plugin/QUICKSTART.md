@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get started with BRO Grondwater Tools in 5 minutes!
+Get started with BRO Grondwater Plugin in 5 minutes!
 
 ## Prerequisites Checklist
 
@@ -36,14 +36,14 @@ print("✓ All dependencies installed!")
 ## 2. Install Plugin (2 minutes)
 
 1. Download the plugin ZIP from GitHub
-2. Copy `bro_groundwater_tools` folder to QGIS plugins directory
+2. Copy `bro_grondwater_plugin` folder to QGIS plugins directory
 3. Restart QGIS
 4. Enable in `Plugins` → `Manage and Install Plugins`
 
 ## 3. Your First Analysis (3 minutes)
 
 ### Step 1: Retrieve Wells
-1. Open the plugin: `Plugins` → `BRO Grondwater Tools`
+1. Open the plugin: `Plugins` → `BRO Grondwater Plugin`
 2. Zoom to a location in the Netherlands (e.g., Utrecht)
 3. Click **"Retrieve Wells from Current Extent"**
 4. Wait 10-30 seconds for data retrieval
@@ -140,7 +140,7 @@ Now that you're familiar with the basics:
 - **Error messages**: Check QGIS Message Log (`View` → `Panels` → `Log Messages`)
 - **Installation issues**: See [INSTALL.md](INSTALL.md)
 - **Bug reports**: Create an issue on GitHub
-- **Questions**: Contact info@cwg-ingenieurs.nl
+- **Questions**: Contact info@cwgi.nl
 
 ## Example Use Cases
 

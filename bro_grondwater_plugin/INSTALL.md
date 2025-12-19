@@ -74,7 +74,7 @@ python3 -m pip install pandas openpyxl matplotlib
 #### Option A: Manual Installation
 
 1. **Download the plugin**:
-   - Download from GitHub: https://github.com/CWG-Ingenieurs/bro-groundwater-tools
+   - Download from GitHub: https://github.com/CWGI/bro-grondwater-plugin
    - Click "Code" → "Download ZIP"
    - Extract the ZIP file
 
@@ -86,15 +86,15 @@ python3 -m pip install pandas openpyxl matplotlib
    If the directory doesn't exist, create it.
 
 3. **Copy plugin folder**:
-   - Copy the entire `bro_groundwater_tools` folder to the plugins directory
+   - Copy the entire `bro_grondwater_plugin` folder to the plugins directory
 
 4. **Verify structure**:
    Your plugins directory should look like this:
    ```
    plugins/
-   └── bro_groundwater_tools/
+   └── bro_grondwater_plugin/
        ├── __init__.py
-       ├── bro_groundwater_tools.py
+       ├── bro_grondwater_plugin.py
        ├── metadata.txt
        └── ... (other files)
    ```
@@ -103,7 +103,7 @@ python3 -m pip install pandas openpyxl matplotlib
 
 ```bash
 cd /path/to/QGIS/plugins/
-git clone https://github.com/CWG-Ingenieurs/bro-groundwater-tools.git bro_groundwater_tools
+git clone https://github.com/CWGI/bro-grondwater-plugin.git bro_grondwater_plugin
 ```
 
 ### 4. Enable the Plugin
@@ -111,12 +111,12 @@ git clone https://github.com/CWG-Ingenieurs/bro-groundwater-tools.git bro_ground
 1. **Restart QGIS**
 2. Go to `Plugins` → `Manage and Install Plugins`
 3. Click on `Installed` tab
-4. Find **BRO Grondwater Tools** in the list
+4. Find **BRO Grondwater Plugin** in the list
 5. Check the checkbox to enable it
 
 ### 5. Verify Installation
 
-1. You should see a new menu item: `Plugins` → `BRO Grondwater Tools`
+1. You should see a new menu item: `Plugins` → `BRO Grondwater Plugin`
 2. A toolbar icon should appear (if toolbar is visible)
 3. Click the menu item or icon to open the plugin dialog
 
@@ -151,7 +151,7 @@ python3 -m pip install --trusted-host pypi.org --trusted-host files.pythonhosted
 
 ### Plugin doesn't appear in menu
 
-1. Check if plugin folder name is exactly `bro_groundwater_tools`
+1. Check if plugin folder name is exactly `bro_grondwater_plugin`
 2. Verify `metadata.txt` and `__init__.py` exist
 3. Check QGIS Plugin Manager for error messages
 4. Look in QGIS logs: `Settings` → `Options` → `Message Log`
@@ -182,20 +182,20 @@ except ImportError as e:
 
 ### Manual Update
 1. Download the latest version
-2. Delete old `bro_groundwater_tools` folder from plugins directory
+2. Delete old `bro_grondwater_plugin` folder from plugins directory
 3. Copy new folder
 4. Restart QGIS
 
 ### Git Update (For Developers)
 ```bash
-cd /path/to/QGIS/plugins/bro_groundwater_tools
+cd /path/to/QGIS/plugins/bro_grondwater_plugin
 git pull origin main
 ```
 
 ## Uninstalling
 
 1. Close QGIS
-2. Delete `bro_groundwater_tools` folder from plugins directory
+2. Delete `bro_grondwater_plugin` folder from plugins directory
 3. Optional: Uninstall Python packages:
    ```bash
    python3 -m pip uninstall hydropandas pandas openpyxl matplotlib
@@ -208,7 +208,7 @@ If you encounter issues:
 1. Check the [README.md](README.md) for usage instructions
 2. Review error messages in QGIS Message Log
 3. Verify all dependencies are installed correctly
-4. Contact CWG Ingenieurs: info@cwg-ingenieurs.nl
+4. Contact CWGI: info@cwgi.nl
 
 ## Next Steps
 

@@ -1,13 +1,13 @@
-# BRO Grondwater Tools - Project Overview
+# BRO Grondwater Plugin - Project Overview
 
-**Developer**: CWG Ingenieurs  
-**Version**: 1.0.0  
-**Date**: December 2024  
-**License**: MIT  
+**Developer**: CWGI
+**Version**: 0.1
+**Date**: December 2024
+**License**: MIT
 
 ## Executive Summary
 
-BRO Grondwater Tools is a QGIS plugin that provides seamless access to Dutch groundwater monitoring data from the BRO (Basisregistratie Ondergrond) through an intuitive interface. The plugin leverages the Hydropandas library to retrieve, filter, visualize, and export groundwater data directly within QGIS.
+BRO Grondwater Plugin is a QGIS plugin that provides seamless access to Dutch groundwater monitoring data from the BRO (Basisregistratie Ondergrond) through an intuitive interface. The plugin leverages the Hydropandas library to retrieve, filter, visualize, and export groundwater data directly within QGIS.
 
 ## Key Features
 
@@ -34,12 +34,12 @@ BRO Grondwater Tools is a QGIS plugin that provides seamless access to Dutch gro
 ## Project Structure
 
 ```
-bro_groundwater_tools/
+bro_grondwater_plugin/
 ├── Core Plugin Files
 │   ├── __init__.py                          # Plugin entry point
-│   ├── bro_groundwater_tools.py             # Main plugin logic
-│   ├── bro_groundwater_tools_dialog.py      # Dialog handler
-│   └── bro_groundwater_tools_dialog_base.ui # UI definition
+│   ├── bro_grondwater_plugin.py             # Main plugin logic
+│   ├── bro_grondwater_plugin_dialog.py      # Dialog handler
+│   └── bro_grondwater_plugin_dialog_base.ui # UI definition
 │
 ├── Configuration
 │   ├── metadata.txt                         # Plugin metadata
@@ -152,7 +152,7 @@ Excel file created with all data
    ```
 
 2. **Install Plugin**
-   - Copy `bro_groundwater_tools` folder to QGIS plugins directory
+   - Copy `bro_grondwater_plugin` folder to QGIS plugins directory
    - Restart QGIS
    - Enable in Plugin Manager
 
@@ -165,14 +165,14 @@ See [INSTALL.md](INSTALL.md) for platform-specific instructions.
 ## GitHub Repository Setup
 
 ### Repository Details
-- **Organization**: CWG-Ingenieurs
-- **Repository Name**: bro-groundwater-tools
+- **Organization**: CWGI
+- **Repository Name**: bro-grondwater-plugin
 - **Visibility**: Private (initially), Public (after testing)
-- **URL**: https://github.com/CWG-Ingenieurs/bro-groundwater-tools
+- **URL**: https://github.com/CWGI/bro-grondwater-plugin
 
 ### Repository Structure
 ```
-bro-groundwater-tools/
+bro-grondwater-plugin/
 ├── All plugin files (as shown above)
 ├── .github/
 │   ├── ISSUE_TEMPLATE/
@@ -182,18 +182,18 @@ bro-groundwater-tools/
 
 ### Initial Setup Commands
 ```bash
-cd bro_groundwater_tools
+cd bro_grondwater_plugin
 git init
 git add .
-git commit -m "Initial commit: BRO Grondwater Tools v1.0.0"
+git commit -m "Initial commit: BRO Grondwater Plugin v0.1"
 git branch -M main
-git remote add origin https://github.com/CWG-Ingenieurs/bro-groundwater-tools.git
+git remote add origin https://github.com/CWGI/bro-grondwater-plugin.git
 git push -u origin main
 ```
 
 ## Branding & Credits
 
-### CWG Ingenieurs Branding
+### CWGI Branding
 - Logo/name in UI header
 - Attribution in all exports
 - Contact info in documentation
@@ -235,9 +235,9 @@ GitHub Issues: Create using bug_report.md template
 GitHub Issues: Create using feature_request.md template
 
 ### Direct Contact
-**CWG Ingenieurs**  
-Email: info@cwg-ingenieurs.nl  
-Website: www.cwg-ingenieurs.nl
+**CWGI**
+Email: info@cwgi.nl
+Website: https://www.cwgi.nl
 
 ### Updates
 Monitor repository for new releases and updates.
@@ -319,7 +319,7 @@ BRO data subject to BRO terms of use
 ## Contact & Resources
 
 ### Development Team
-**CWG Ingenieurs**  
+**CWGI**
 Hydrogeological engineering and consulting
 
 ### Related Links

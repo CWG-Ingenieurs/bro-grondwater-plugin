@@ -1,4 +1,4 @@
-# BRO Grondwater Tools
+# BRO Grondwater Plugin
 
 A QGIS plugin for retrieving and analyzing BRO (Basisregistratie Ondergrond) groundwater monitoring well data using Hydropandas.
 
@@ -25,7 +25,7 @@ A QGIS plugin for retrieving and analyzing BRO (Basisregistratie Ondergrond) gro
 ### Install Plugin
 
 1. Download the plugin repository
-2. Copy the `bro_groundwater_tools` folder to your QGIS plugins directory:
+2. Copy the `bro_grondwater_plugin` folder to your QGIS plugins directory:
    - **Windows**: `C:\Users\<YourUsername>\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins`
    - **macOS**: `~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins`
    - **Linux**: `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins`
@@ -43,13 +43,13 @@ pip install pandas openpyxl matplotlib
 ```
 
 4. Restart QGIS
-5. Enable the plugin: `Plugins` → `Manage and Install Plugins` → `Installed` → Check `BRO Grondwater Tools`
+5. Enable the plugin: `Plugins` → `Manage and Install Plugins` → `Installed` → Check `BRO Grondwater Plugin`
 
 ## Usage
 
 ### 1. Retrieve Wells
 
-1. Open the plugin from `Plugins` → `BRO Grondwater Tools` or click the toolbar icon
+1. Open the plugin from `Plugins` → `BRO Grondwater Plugin` or click the toolbar icon
 2. Zoom to your area of interest in QGIS
 3. Click **"Retrieve Wells from Current Extent"**
 4. The plugin will retrieve all BRO groundwater monitoring wells within the visible extent
@@ -134,7 +134,7 @@ pip install pandas openpyxl matplotlib
 
 ## Credits
 
-- **Developed by**: CWG Ingenieurs
+- **Developed by**: CWGI
 - **Powered by**: [Hydropandas](https://github.com/ArtesiaWater/hydropandas) (Artesia)
 - **Data Source**: [BRO](https://www.broloket.nl/) (Basisregistratie Ondergrond)
 
@@ -148,11 +148,11 @@ MIT License - See LICENSE file for details
 
 ## Contributing
 
-This is a private repository. For bug reports or feature requests, please contact CWG Ingenieurs.
+This is a private repository. For bug reports or feature requests, please contact CWGI.
 
 ## Version History
 
-### 1.0.0 (2024)
+### 0.1 (2024)
 - Initial release
 - Extent-based well retrieval
 - Depth filtering
@@ -162,9 +162,9 @@ This is a private repository. For bug reports or feature requests, please contac
 
 ## Contact
 
-**CWG Ingenieurs**
-- Website: [www.cwg-ingenieurs.nl](https://www.cwg-ingenieurs.nl)
-- Email: info@cwg-ingenieurs.nl
+**CWGI**
+- Website: [www.cwgi.nl](https://www.cwgi.nl)
+- Email: info@cwgi.nl
 
 ## Links
 
