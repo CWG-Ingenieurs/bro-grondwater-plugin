@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/plugins/bro_groundwater_tools">
+    <file>icon.png</file>
+    <file>styles/wells_style.qmd</file>
+  </qresource>
+</RCC>

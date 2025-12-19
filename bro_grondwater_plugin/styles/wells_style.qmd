@@ -1,0 +1,162 @@
+<!DOCTYPE qgis PUBLIC 'http://mrcc.com/qgis.dtd' 'SYSTEM'>
+<qgis version="3.28.0" styleCategories="Symbology|Labeling">
+  <renderer-v2 type="graduatedSymbol" attr="top_filter" enableorderby="0" forceraster="0" graduatedMethod="GraduatedColor" symbollevels="0" referencescale="-1">
+    <ranges>
+      <range render="true" symbol="0" lower="0.000000" upper="5.000000" label="0 - 5 m"/>
+      <range render="true" symbol="1" lower="5.000000" upper="10.000000" label="5 - 10 m"/>
+      <range render="true" symbol="2" lower="10.000000" upper="20.000000" label="10 - 20 m"/>
+      <range render="true" symbol="3" lower="20.000000" upper="50.000000" label="20 - 50 m"/>
+      <range render="true" symbol="4" lower="50.000000" upper="100.000000" label="50 - 100 m"/>
+      <range render="true" symbol="5" lower="100.000000" upper="999.000000" label="> 100 m"/>
+    </ranges>
+    <symbols>
+      <symbol type="marker" name="0" alpha="1" clip_to_extent="1" force_rhr="0">
+        <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+          <prop k="angle" v="0"/>
+          <prop k="color" v="215,25,28,255"/>
+          <prop k="horizontal_anchor_point" v="1"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="name" v="circle"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="128,17,25,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.4"/>
+          <prop k="outline_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="scale_method" v="diameter"/>
+          <prop k="size" v="3"/>
+          <prop k="size_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="size_unit" v="MM"/>
+          <prop k="vertical_anchor_point" v="1"/>
+        </layer>
+      </symbol>
+      <symbol type="marker" name="1" alpha="1" clip_to_extent="1" force_rhr="0">
+        <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+          <prop k="angle" v="0"/>
+          <prop k="color" v="253,174,97,255"/>
+          <prop k="horizontal_anchor_point" v="1"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="name" v="circle"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="128,87,48,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.4"/>
+          <prop k="outline_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="scale_method" v="diameter"/>
+          <prop k="size" v="3"/>
+          <prop k="size_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="size_unit" v="MM"/>
+          <prop k="vertical_anchor_point" v="1"/>
+        </layer>
+      </symbol>
+      <symbol type="marker" name="2" alpha="1" clip_to_extent="1" force_rhr="0">
+        <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+          <prop k="angle" v="0"/>
+          <prop k="color" v="255,255,191,255"/>
+          <prop k="horizontal_anchor_point" v="1"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="name" v="circle"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="128,128,95,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.4"/>
+          <prop k="outline_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="scale_method" v="diameter"/>
+          <prop k="size" v="3"/>
+          <prop k="size_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="size_unit" v="MM"/>
+          <prop k="vertical_anchor_point" v="1"/>
+        </layer>
+      </symbol>
+      <symbol type="marker" name="3" alpha="1" clip_to_extent="1" force_rhr="0">
+        <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+          <prop k="angle" v="0"/>
+          <prop k="color" v="166,217,106,255"/>
+          <prop k="horizontal_anchor_point" v="1"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="name" v="circle"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="83,108,53,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.4"/>
+          <prop k="outline_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="scale_method" v="diameter"/>
+          <prop k="size" v="3"/>
+          <prop k="size_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="size_unit" v="MM"/>
+          <prop k="vertical_anchor_point" v="1"/>
+        </layer>
+      </symbol>
+      <symbol type="marker" name="4" alpha="1" clip_to_extent="1" force_rhr="0">
+        <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+          <prop k="angle" v="0"/>
+          <prop k="color" v="26,150,65,255"/>
+          <prop k="horizontal_anchor_point" v="1"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="name" v="circle"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="13,75,32,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.4"/>
+          <prop k="outline_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="scale_method" v="diameter"/>
+          <prop k="size" v="3"/>
+          <prop k="size_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="size_unit" v="MM"/>
+          <prop k="vertical_anchor_point" v="1"/>
+        </layer>
+      </symbol>
+      <symbol type="marker" name="5" alpha="1" clip_to_extent="1" force_rhr="0">
+        <layer class="SimpleMarker" enabled="1" locked="0" pass="0">
+          <prop k="angle" v="0"/>
+          <prop k="color" v="43,131,186,255"/>
+          <prop k="horizontal_anchor_point" v="1"/>
+          <prop k="joinstyle" v="bevel"/>
+          <prop k="name" v="circle"/>
+          <prop k="offset" v="0,0"/>
+          <prop k="offset_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="offset_unit" v="MM"/>
+          <prop k="outline_color" v="21,65,93,255"/>
+          <prop k="outline_style" v="solid"/>
+          <prop k="outline_width" v="0.4"/>
+          <prop k="outline_width_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="outline_width_unit" v="MM"/>
+          <prop k="scale_method" v="diameter"/>
+          <prop k="size" v="3"/>
+          <prop k="size_map_unit_scale" v="3x:0,0,0,0,0,0"/>
+          <prop k="size_unit" v="MM"/>
+          <prop k="vertical_anchor_point" v="1"/>
+        </layer>
+      </symbol>
+    </symbols>
+    <rotation/>
+    <sizescale/>
+  </renderer-v2>
+  <labeling type="simple">
+    <settings calloutType="simple">
+      <text-style fontFamily="Arial" fontSize="8" fontWeight="50" fontItalic="0" fontUnderline="0" fontStrikeout="0" fontSizeUnit="Point" textColor="0,0,0,255" textOpacity="1" fieldName="bro_id" previewBkgrdColor="255,255,255,255">
+        <text-buffer bufferSize="0.5" bufferColor="255,255,255,255" bufferOpacity="1" bufferSizeUnits="MM" bufferSizeMapUnitScale="3x:0,0,0,0,0,0" bufferNoFill="0" bufferDraw="1" bufferJoinStyle="128" bufferBlendMode="0"/>
+      </text-style>
+      <text-format decimals="3" formatNumbers="0" placeDirectionSymbol="0" reverseDirectionSymbol="0" plussign="0" multilineAlign="3" addDirectionSymbol="0" useMaxLineLengthForAutoWrap="1" wrapChar="" autoWrapLength="0" leftDirectionSymbol="&lt;" rightDirectionSymbol=">"/>
+      <placement offsetType="0" maxCurvedCharAngleIn="25" maxCurvedCharAngleOut="-25" priority="5" dist="0" distUnits="MM" distMapUnitScale="3x:0,0,0,0,0,0" centroidInside="0" centroidWhole="0" repeatDistance="0" repeatDistanceUnits="MM" repeatDistanceMapUnitScale="3x:0,0,0,0,0,0" fitInPolygonOnly="0" quadOffset="4" xOffset="0" yOffset="0" offsetUnits="MM" labelOffsetMapUnitScale="3x:0,0,0,0,0,0" rotationAngle="0" preserveRotation="1" placement="1" geometryGenerator="" geometryGeneratorEnabled="0" geometryGeneratorType="PointGeometry" predefinedPositionOrder="TR,TL,BR,BL,R,L,TSR,BSR" placementFlags="10" layerType="PointGeometry" overrunDistance="0" overrunDistanceUnit="MM" overrunDistanceMapUnitScale="3x:0,0,0,0,0,0"/>
+      <rendering displayAll="0" drawLabels="1" mergeLines="0" obstacleType="1" obstacleFactor="1" limitNumLabels="0" labelPerPart="0" minFeatureSize="0" maxNumLabels="2000" obstacle="1" scaleVisibility="0" scaleMin="0" scaleMax="0" fontLimitPixelSize="0" fontMinPixelSize="3" fontMaxPixelSize="10000" upsidedownLabels="0" zIndex="0"/>
+    </settings>
+  </labeling>
+  <blendMode>0</blendMode>
+  <featureBlendMode>0</featureBlendMode>
+  <layerOpacity>1</layerOpacity>
+</qgis>

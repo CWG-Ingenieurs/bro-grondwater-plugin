@@ -1,0 +1,13 @@
+# Python dependencies for BRO Grondwater Tools
+# Install using: pip install -r requirements.txt
+
+# Core dependencies
+pandas>=1.3.0
+openpyxl>=3.0.0
+matplotlib>=3.3.0
+
+# Hydropandas - use DEV version with brodata engine
+# Install with: pip install git+https://github.com/ArtesiaWater/hydropandas.git
+hydropandas[brodata]
+
+# Note: QGIS packages (PyQt5, qgis) are provided by QGIS installation

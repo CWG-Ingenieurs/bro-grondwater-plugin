@@ -1,0 +1,17 @@
+[general]
+name=BRO Grondwater Tools
+qgisMinimumVersion=3.0
+description=Retrieve and analyze BRO groundwater monitoring well data using Hydropandas
+version=1.0.0
+author=CWG Ingenieurs
+email=info@cwg-ingenieurs.nl
+
+about=This plugin retrieves BRO groundwater monitoring well locations and measurements using Hydropandas. Features include: extent-based well retrieval, depth filtering, measurement visualization, and Excel export. Powered by Hydropandas (Artesia).
+
+tracker=https://github.com/CWG-Ingenieurs/bro-groundwater-tools/issues
+repository=https://github.com/CWG-Ingenieurs/bro-groundwater-tools
+tags=groundwater, BRO, hydrology, monitoring, wells
+category=Plugins
+icon=icon.png
+experimental=False
+deprecated=False
