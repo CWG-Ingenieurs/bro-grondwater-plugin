@@ -619,7 +619,7 @@ class BROGrondwaterPlugin:
 
         # Start ThreadPoolExecutor
         try:
-            self._executor = ThreadPoolExecutor(max_workers=4)
+            self._executor = ThreadPoolExecutor(max_workers=8)
 
             # Submit all downloads
             for feature_data in features_to_download:

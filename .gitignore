@@ -208,3 +208,6 @@ __marimo__/
 
 # PowerShell scripts
 *.ps1
+
+# Claude Code
+.claude/
