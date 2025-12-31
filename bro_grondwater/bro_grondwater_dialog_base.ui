@@ -1,0 +1,308 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BROGrondwaterPluginDialogBase</class>
+ <widget class="QWidget" name="BROGrondwaterPluginDialogBase">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>520</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>BRO Grondwater Plugin</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>4</number>
+   </property>
+   <property name="margin">
+    <number>6</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="labelLogo">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:14pt; font-weight:600; color:#0066cc;"&gt;BRO Grondwater Plugin&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxLayers">
+     <property name="title">
+      <string>1. Map Layers</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_layers">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <property name="margin">
+       <number>4</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="btnAddBasemap">
+        <property name="text">
+         <string>Add Basemap</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnAddWmsLayer">
+        <property name="text">
+         <string>Add GMW (WMS)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxRetrieve">
+     <property name="title">
+      <string>2. Retrieve Wells</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <property name="margin">
+       <number>4</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="btnRetrieveWells">
+        <property name="text">
+         <string>Retrieve Wells from Current Extent</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxFilter">
+     <property name="title">
+      <string>3. Filter by Depth (m NAP)</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayoutFilter">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>4</number>
+      </property>
+      <item>
+       <widget class="QFrame" name="frameHistogram">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>80</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>80</height>
+         </size>
+        </property>
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Sunken</enum>
+        </property>
+        <layout class="QVBoxLayout" name="histogramLayout">
+         <property name="margin">
+          <number>0</number>
+         </property>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="filterLayout">
+        <property name="spacing">
+         <number>4</number>
+        </property>
+        <item>
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>Min:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spinMinDepth">
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>0.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="label_3">
+          <property name="text">
+           <string>Max:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QDoubleSpinBox" name="spinMaxDepth">
+          <property name="minimum">
+           <double>-100.000000000000000</double>
+          </property>
+          <property name="maximum">
+           <double>1000.000000000000000</double>
+          </property>
+          <property name="value">
+           <double>100.000000000000000</double>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnApplyFilter">
+          <property name="text">
+           <string>Apply</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxDownload">
+     <property name="title">
+      <string>4. Download Measurements</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_download">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>4</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="btnDownloadMeasurements">
+        <property name="text">
+         <string>Download for Selected Wells</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="labelDownloadStatus">
+        <property name="text">
+         <string>No measurements downloaded yet</string>
+        </property>
+        <property name="styleSheet">
+         <string>color: #666666; font-style: italic;</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBoxAnalyze">
+     <property name="title">
+      <string>5. Analyze</string>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_analyze">
+      <property name="spacing">
+       <number>4</number>
+      </property>
+      <property name="margin">
+       <number>4</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="btnPlotData">
+        <property name="text">
+         <string>Plot</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="btnExportExcel">
+        <property name="text">
+         <string>Export to Excel</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="progressLayout">
+     <property name="spacing">
+      <number>4</number>
+     </property>
+     <item>
+      <widget class="QProgressBar" name="progressBar">
+       <property name="value">
+        <number>0</number>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btnCancel">
+       <property name="text">
+        <string>Cancel</string>
+       </property>
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>60</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="statusLabel">
+     <property name="text">
+      <string>Ready</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>10</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
+    <widget class="QLabel" name="labelCredits">
+     <property name="text">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align="center"&gt;&lt;span style=" font-size:7pt; color:#999999;"&gt;Developed by &lt;/span&gt;&lt;a href="https://www.cwgi.nl"&gt;&lt;span style=" font-size:7pt; color:#0066cc;"&gt;CWG Ingenieurs b.v.&lt;/span&gt;&lt;/a&gt;&lt;span style=" font-size:7pt; color:#999999;"&gt; | Software provided 'as is'&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="openExternalLinks">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
