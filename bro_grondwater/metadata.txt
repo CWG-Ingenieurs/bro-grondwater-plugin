@@ -1,0 +1,18 @@
+[general]
+name=BRO Grondwater
+qgisMinimumVersion=3.4
+description=Retrieve and analyze BRO groundwater monitoring well data using Hydropandas
+pip_dependencies=pandas>=1.3.0,xlsxwriter>=3.0.0,matplotlib>=3.3.0,hydropandas,brodata
+version=0.1
+author=CWG Ingenieurs b.v.
+email=info@cwgi.nl
+
+about=This plugin retrieves BRO groundwater monitoring well locations and measurements using Hydropandas. Features include: extent-based well retrieval, depth filtering, measurement visualization, and Excel export. Powered by the python packages Hydropandas and Brodata.
+
+tracker=https://github.com/CWG-Ingenieurs/bro-grondwater-plugin/issues
+repository=https://github.com/CWG-Ingenieurs/bro-grondwater-plugin
+tags=groundwater, BRO, hydrology, monitoring, wells
+category=Plugins
+icon=icon.png
+experimental=False
+deprecated=False
