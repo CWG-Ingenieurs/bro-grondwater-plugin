@@ -608,6 +608,22 @@ class BROGrondwaterPlugin:
             self.dlg.statusLabel.setText(f"All {len(selected_features)} wells already downloaded")
             return
 
+        # Warn user if downloading many wells
+        if len(features_to_download) > 20:
+            reply = QMessageBox.warning(
+                self.dlg,
+                "Large Download",
+                f"You are about to download measurements for {len(features_to_download)} wells.\n\n"
+                "This may take a long time. Consider selecting fewer wells or "
+                "applying a filter first.\n\n"
+                f"Do you want to download the timeseries for all {len(features_to_download)} wells anyway?",
+                QMessageBox.Yes | QMessageBox.No,
+                QMessageBox.No
+            )
+            if reply != QMessageBox.Yes:
+                self.dlg.statusLabel.setText("Download cancelled")
+                return
+
         self._start_operation()
         self.dlg.statusLabel.setText(f"Starting download of {len(features_to_download)} wells...")
 
