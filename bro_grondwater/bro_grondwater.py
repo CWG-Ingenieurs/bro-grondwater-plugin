@@ -1019,7 +1019,7 @@ class BROGrondwaterPlugin:
 
             # Create plot dialog
             plot_dialog = QDialog(self.dlg)
-            plot_dialog.setWindowTitle("Groundwater Measurements")
+            plot_dialog.setWindowTitle("Grondwaterstand")
             plot_dialog.resize(800, 600)
             layout = QVBoxLayout()
 
@@ -1063,9 +1063,9 @@ class BROGrondwaterPlugin:
                 self.dlg.statusLabel.setText("Ready")
                 return
 
-            ax.set_xlabel('Date')
-            ax.set_ylabel('Groundwater Level (m NAP)')
-            ax.set_title('Groundwater Measurements')
+            ax.set_xlabel('Datum')
+            ax.set_ylabel('Stijghoogte (m NAP)')
+            ax.set_title('Grondwaterstand')
             ax.legend()
             ax.grid(True, alpha=0.3)
             plt.tight_layout()
@@ -1256,12 +1256,16 @@ class BROGrondwaterPlugin:
 
                 # Build and write data rows efficiently
                 for row, date in enumerate(all_dates, 1):
-                    # Build row data: [date, val1, val2, ...]
-                    row_data = [date] + [series_dicts[gmw_id].get(date) for gmw_id in gmw_ids]
-                    data_ws.write_row(row, 0, row_data)
+                    # Write date with explicit format (write_row doesn't apply formats)
+                    data_ws.write_datetime(row, 0, date, date_format)
+                    # Write values for each series
+                    for col, gmw_id in enumerate(gmw_ids, 1):
+                        value = series_dicts[gmw_id].get(date)
+                        if value is not None:
+                            data_ws.write_number(row, col, value)
 
-                # Apply date format to first column
-                data_ws.set_column(0, 0, 20, date_format)
+                # Set column width for date column
+                data_ws.set_column(0, 0, 20)
                 # Set data column widths based on header length (names can be long)
                 for col, series_id in enumerate(gmw_ids, 1):
                     data_ws.set_column(col, col, max(len(series_id) + 2, 18))
@@ -1279,16 +1283,16 @@ class BROGrondwaterPlugin:
                         'values': ['Chart Data', 1, col, num_rows, col],
                     })
 
-                # Style the chart
-                chart.set_title({'name': 'Groundwater Measurements'})
+                # Style the chart (Dutch labels)
+                chart.set_title({'name': 'Grondwaterstand'})
                 chart.set_x_axis({
-                    'name': 'Date',
+                    'name': 'Datum',
                     'date_axis': True,
                     'label_position': 'low',  # Labels at bottom of plot area
                     'num_format': 'dd-mm-yyyy',
                 })
                 chart.set_y_axis({
-                    'name': 'Level (m NAP)',
+                    'name': 'Stijghoogte (m NAP)',
                     'crossing': 'min',  # X-axis crosses at y-minimum, not at y=0
                 })
                 chart.set_legend({'position': 'bottom'})  # Legend below chart
