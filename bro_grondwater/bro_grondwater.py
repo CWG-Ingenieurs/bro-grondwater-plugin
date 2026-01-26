@@ -1272,9 +1272,10 @@ class BROGrondwaterPlugin:
                 for col, series_id in enumerate(gmw_ids, 1):
                     data_ws.set_column(col, col, max(len(series_id) + 2, 18))
 
-                # Create chart with show_blanks_as='span' to connect across gaps
-                chart = workbook.add_chart({'type': 'line'})
-                chart.show_blanks_as('span')  # This properly connects lines across empty cells
+                # Create scatter chart with straight lines (spreiding met rechte lijnen)
+                # This properly handles datetime values on the X-axis
+                chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
+                chart.show_blanks_as('span')  # Connect points across empty cells
 
                 # Add data series
                 num_rows = len(all_dates)
@@ -1289,8 +1290,6 @@ class BROGrondwaterPlugin:
                 chart.set_title({'name': 'Grondwaterstand'})
                 chart.set_x_axis({
                     'name': 'Datum',
-                    'date_axis': True,
-                    'label_position': 'low',  # Labels at bottom of plot area
                     'num_format': 'dd-mm-yyyy',
                 })
                 chart.set_y_axis({
