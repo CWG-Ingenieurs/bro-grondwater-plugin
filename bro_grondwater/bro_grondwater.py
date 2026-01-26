@@ -426,15 +426,16 @@ class BROGrondwaterPlugin:
             layer = QgsVectorLayer('Point?crs=EPSG:28992', 'BRO Monitoring Wells', 'memory')
             provider = layer.dataProvider()
             
-            # Add fields
+            # Add fields (Hydropandas style naming)
             provider.addAttributes([
                 QgsField('name', QVariant.String),
                 QgsField('bro_id', QVariant.String),
                 QgsField('x', QVariant.Double),
                 QgsField('y', QVariant.Double),
                 QgsField('ground_level', QVariant.Double),
-                QgsField('top_filter', QVariant.Double),
-                QgsField('bottom_filter', QVariant.Double),
+                QgsField('screen_top', QVariant.Double),
+                QgsField('screen_bottom', QVariant.Double),
+                QgsField('tube_top', QVariant.Double),
                 QgsField('tube_nr', QVariant.Int),
             ])
             layer.updateFields()
@@ -470,6 +471,7 @@ class BROGrondwaterPlugin:
                     metadata.get('ground_level', row.get('ground_level', None)),
                     metadata.get('screen_top', row.get('screen_top', None)),
                     metadata.get('screen_bottom', row.get('screen_bottom', None)),
+                    metadata.get('tube_top', row.get('tube_top', None)),
                     metadata.get('tube_nr', row.get('tube_nr', None)),
                 ]
                 feature.setAttributes(attributes)
@@ -502,7 +504,7 @@ class BROGrondwaterPlugin:
             self.obs_collection = obs_collection
             self.engine_used = engine_used
 
-            # Update filter histogram with top_filter values
+            # Update filter histogram with screen_top values
             self._update_filter_histogram()
             
             QMessageBox.information(
@@ -537,9 +539,9 @@ class BROGrondwaterPlugin:
 
             # Build filter expression
             if max_depth > min_depth:
-                filter_expr = f'"top_filter" >= {min_depth} AND "top_filter" <= {max_depth}'
+                filter_expr = f'"screen_top" >= {min_depth} AND "screen_top" <= {max_depth}'
             else:
-                filter_expr = f'"top_filter" >= {min_depth}'
+                filter_expr = f'"screen_top" >= {min_depth}'
 
             self.wells_layer.setSubsetString(filter_expr)
 
@@ -820,7 +822,7 @@ class BROGrondwaterPlugin:
         self._end_operation()
 
     def _update_filter_histogram(self, filter_min=None, filter_max=None):
-        """Update the histogram showing top_filter distribution."""
+        """Update the histogram showing screen_top distribution."""
         if self.wells_layer is None:
             return
 
@@ -829,21 +831,21 @@ class BROGrondwaterPlugin:
             from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
             import numpy as np
 
-            # Get top_filter values from the layer (unfiltered)
+            # Get screen_top values from the layer (unfiltered)
             self.wells_layer.setSubsetString('')  # Temporarily remove filter
-            top_filter_values = []
+            screen_top_values = []
             for feature in self.wells_layer.getFeatures():
-                val = feature['top_filter']
+                val = feature['screen_top']
                 if val is not None:
-                    top_filter_values.append(val)
+                    screen_top_values.append(val)
 
             # Restore filter if set
             if filter_min is not None and filter_max is not None and filter_max > filter_min:
                 self.wells_layer.setSubsetString(
-                    f'"top_filter" >= {filter_min} AND "top_filter" <= {filter_max}'
+                    f'"screen_top" >= {filter_min} AND "screen_top" <= {filter_max}'
                 )
 
-            if not top_filter_values:
+            if not screen_top_values:
                 return
 
             # Clear existing histogram
@@ -857,7 +859,7 @@ class BROGrondwaterPlugin:
             ax.set_facecolor('#f0f0f0')
 
             # Plot histogram
-            n, bins, patches = ax.hist(top_filter_values, bins=20, color='#0066cc',
+            n, bins, patches = ax.hist(screen_top_values, bins=20, color='#0066cc',
                                         edgecolor='white', alpha=0.7)
 
             # Highlight filtered range if set
@@ -871,8 +873,8 @@ class BROGrondwaterPlugin:
             ax.tick_params(axis='both', labelsize=7)
 
             # Update spin box ranges based on data
-            data_min = min(top_filter_values)
-            data_max = max(top_filter_values)
+            data_min = min(screen_top_values)
+            data_max = max(screen_top_values)
             self.dlg.spinMinDepth.setMinimum(data_min - 10)
             self.dlg.spinMinDepth.setMaximum(data_max + 10)
             self.dlg.spinMaxDepth.setMinimum(data_min - 10)
