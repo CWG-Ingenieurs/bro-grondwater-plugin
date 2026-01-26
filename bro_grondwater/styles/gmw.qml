@@ -419,14 +419,21 @@
         </config>
       </editWidget>
     </field>
-    <field name="top_filter" configurationFlags="NoFlag">
+    <field name="screen_top" configurationFlags="NoFlag">
       <editWidget type="TextEdit">
         <config>
           <Option/>
         </config>
       </editWidget>
     </field>
-    <field name="bottom_filter" configurationFlags="NoFlag">
+    <field name="screen_bottom" configurationFlags="NoFlag">
+      <editWidget type="TextEdit">
+        <config>
+          <Option/>
+        </config>
+      </editWidget>
+    </field>
+    <field name="tube_top" configurationFlags="NoFlag">
       <editWidget type="TextEdit">
         <config>
           <Option/>
@@ -447,9 +454,10 @@
     <alias name="" index="2" field="x"/>
     <alias name="" index="3" field="y"/>
     <alias name="" index="4" field="ground_level"/>
-    <alias name="" index="5" field="top_filter"/>
-    <alias name="" index="6" field="bottom_filter"/>
-    <alias name="" index="7" field="tube_nr"/>
+    <alias name="" index="5" field="screen_top"/>
+    <alias name="" index="6" field="screen_bottom"/>
+    <alias name="" index="7" field="tube_top"/>
+    <alias name="" index="8" field="tube_nr"/>
   </aliases>
   <splitPolicies>
     <policy policy="Duplicate" field="name"/>
@@ -457,8 +465,9 @@
     <policy policy="Duplicate" field="x"/>
     <policy policy="Duplicate" field="y"/>
     <policy policy="Duplicate" field="ground_level"/>
-    <policy policy="Duplicate" field="top_filter"/>
-    <policy policy="Duplicate" field="bottom_filter"/>
+    <policy policy="Duplicate" field="screen_top"/>
+    <policy policy="Duplicate" field="screen_bottom"/>
+    <policy policy="Duplicate" field="tube_top"/>
     <policy policy="Duplicate" field="tube_nr"/>
   </splitPolicies>
   <duplicatePolicies>
@@ -467,8 +476,9 @@
     <policy policy="Duplicate" field="x"/>
     <policy policy="Duplicate" field="y"/>
     <policy policy="Duplicate" field="ground_level"/>
-    <policy policy="Duplicate" field="top_filter"/>
-    <policy policy="Duplicate" field="bottom_filter"/>
+    <policy policy="Duplicate" field="screen_top"/>
+    <policy policy="Duplicate" field="screen_bottom"/>
+    <policy policy="Duplicate" field="tube_top"/>
     <policy policy="Duplicate" field="tube_nr"/>
   </duplicatePolicies>
   <defaults>
@@ -477,8 +487,9 @@
     <default applyOnUpdate="0" field="x" expression=""/>
     <default applyOnUpdate="0" field="y" expression=""/>
     <default applyOnUpdate="0" field="ground_level" expression=""/>
-    <default applyOnUpdate="0" field="top_filter" expression=""/>
-    <default applyOnUpdate="0" field="bottom_filter" expression=""/>
+    <default applyOnUpdate="0" field="screen_top" expression=""/>
+    <default applyOnUpdate="0" field="screen_bottom" expression=""/>
+    <default applyOnUpdate="0" field="tube_top" expression=""/>
     <default applyOnUpdate="0" field="tube_nr" expression=""/>
   </defaults>
   <constraints>
@@ -487,8 +498,9 @@
     <constraint notnull_strength="0" unique_strength="0" field="x" exp_strength="0" constraints="0"/>
     <constraint notnull_strength="0" unique_strength="0" field="y" exp_strength="0" constraints="0"/>
     <constraint notnull_strength="0" unique_strength="0" field="ground_level" exp_strength="0" constraints="0"/>
-    <constraint notnull_strength="0" unique_strength="0" field="top_filter" exp_strength="0" constraints="0"/>
-    <constraint notnull_strength="0" unique_strength="0" field="bottom_filter" exp_strength="0" constraints="0"/>
+    <constraint notnull_strength="0" unique_strength="0" field="screen_top" exp_strength="0" constraints="0"/>
+    <constraint notnull_strength="0" unique_strength="0" field="screen_bottom" exp_strength="0" constraints="0"/>
+    <constraint notnull_strength="0" unique_strength="0" field="tube_top" exp_strength="0" constraints="0"/>
     <constraint notnull_strength="0" unique_strength="0" field="tube_nr" exp_strength="0" constraints="0"/>
   </constraints>
   <constraintExpressions>
@@ -497,8 +509,9 @@
     <constraint field="x" exp="" desc=""/>
     <constraint field="y" exp="" desc=""/>
     <constraint field="ground_level" exp="" desc=""/>
-    <constraint field="top_filter" exp="" desc=""/>
-    <constraint field="bottom_filter" exp="" desc=""/>
+    <constraint field="screen_top" exp="" desc=""/>
+    <constraint field="screen_bottom" exp="" desc=""/>
+    <constraint field="tube_top" exp="" desc=""/>
     <constraint field="tube_nr" exp="" desc=""/>
   </constraintExpressions>
   <expressionfields/>
@@ -512,8 +525,9 @@
       <column type="field" name="x" width="-1" hidden="0"/>
       <column type="field" name="y" width="-1" hidden="0"/>
       <column type="field" name="ground_level" width="-1" hidden="0"/>
-      <column type="field" name="top_filter" width="-1" hidden="0"/>
-      <column type="field" name="bottom_filter" width="-1" hidden="0"/>
+      <column type="field" name="screen_top" width="-1" hidden="0"/>
+      <column type="field" name="screen_bottom" width="-1" hidden="0"/>
+      <column type="field" name="tube_top" width="-1" hidden="0"/>
       <column type="field" name="tube_nr" width="-1" hidden="0"/>
       <column type="actions" width="-1" hidden="1"/>
     </columns>
@@ -546,31 +560,34 @@ control = dialog.findChild(QWidget, "MyLineEdit")
   <featformsuppress>0</featformsuppress>
   <editorlayout>generatedlayout</editorlayout>
   <editable>
-    <field name="bottom_filter" editable="1"/>
+    <field name="screen_bottom" editable="1"/>
     <field name="bro_id" editable="1"/>
     <field name="ground_level" editable="1"/>
     <field name="name" editable="1"/>
-    <field name="top_filter" editable="1"/>
+    <field name="screen_top" editable="1"/>
+    <field name="tube_top" editable="1"/>
     <field name="tube_nr" editable="1"/>
     <field name="x" editable="1"/>
     <field name="y" editable="1"/>
   </editable>
   <labelOnTop>
-    <field name="bottom_filter" labelOnTop="0"/>
+    <field name="screen_bottom" labelOnTop="0"/>
     <field name="bro_id" labelOnTop="0"/>
     <field name="ground_level" labelOnTop="0"/>
     <field name="name" labelOnTop="0"/>
-    <field name="top_filter" labelOnTop="0"/>
+    <field name="screen_top" labelOnTop="0"/>
+    <field name="tube_top" labelOnTop="0"/>
     <field name="tube_nr" labelOnTop="0"/>
     <field name="x" labelOnTop="0"/>
     <field name="y" labelOnTop="0"/>
   </labelOnTop>
   <reuseLastValue>
-    <field name="bottom_filter" reuseLastValue="0"/>
+    <field name="screen_bottom" reuseLastValue="0"/>
     <field name="bro_id" reuseLastValue="0"/>
     <field name="ground_level" reuseLastValue="0"/>
     <field name="name" reuseLastValue="0"/>
-    <field name="top_filter" reuseLastValue="0"/>
+    <field name="screen_top" reuseLastValue="0"/>
+    <field name="tube_top" reuseLastValue="0"/>
     <field name="tube_nr" reuseLastValue="0"/>
     <field name="x" reuseLastValue="0"/>
     <field name="y" reuseLastValue="0"/>
