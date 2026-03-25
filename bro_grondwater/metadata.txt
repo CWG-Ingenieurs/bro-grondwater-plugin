@@ -23,11 +23,9 @@ changelog=0.3
     - Fix issue #4: retry with exponential backoff on HTTP 429 (rate limit) errors; reduced concurrent downloads from 8 to 3
     - Fix issue #5: auto-install missing dependencies (hydropandas, brodata, etc.) on plugin load
     - Fix issue #10: filter NaN measurement values before Excel export to prevent #GETAL errors in Dutch Excel
-
-0.2
+    0.2
     - Hydropandas field name fixes
-
-0.1
+    0.1
     - Initial release
     - Extent-based well retrieval from BRO
     - Depth filtering with histogram visualization
