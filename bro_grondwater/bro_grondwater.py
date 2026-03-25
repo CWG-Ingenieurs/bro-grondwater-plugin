@@ -163,7 +163,7 @@ class BROGrondwaterPlugin:
             self.dock_widget.setWidget(self.dlg)
             self.dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
 
-            # Add to QGIS interface on the right side
+            # Add to QGIS interface on the right side (can be docked alongside Processing Toolbox)
             self.iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dock_widget)
 
         # Show/toggle the dock widget
