@@ -161,10 +161,10 @@ class BROGrondwaterPlugin:
             # Create dock widget and add panel
             self.dock_widget = QDockWidget("BRO Grondwater", self.iface.mainWindow())
             self.dock_widget.setWidget(self.dlg)
-            self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+            self.dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
 
             # Add to QGIS interface on the right side
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
+            self.iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dock_widget)
 
         # Show/toggle the dock widget
         if self.dock_widget.isVisible():
