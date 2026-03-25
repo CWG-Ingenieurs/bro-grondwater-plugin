@@ -8,7 +8,7 @@ def _install_dependencies():
     """Auto-install required packages via pip if not already present."""
     import subprocess
     import sys
-    packages = ['hydropandas', 'brodata', 'xlsxwriter', 'matplotlib']
+    packages = ['hydropandas', 'brodata', 'xlsxwriter']
     for package in packages:
         try:
             __import__(package.replace('-', '_'))

@@ -841,12 +841,11 @@ class BROGrondwaterPlugin:
             return
 
         try:
-            import matplotlib.pyplot as plt
-            from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
+            import pyqtgraph as pg
             import numpy as np
 
             # Get screen_top values from the layer (unfiltered)
-            self.wells_layer.setSubsetString('')  # Temporarily remove filter
+            self.wells_layer.setSubsetString('')
             screen_top_values = []
             for feature in self.wells_layer.getFeatures():
                 val = feature['screen_top']
@@ -862,31 +861,37 @@ class BROGrondwaterPlugin:
             if not screen_top_values:
                 return
 
-            # Clear existing histogram
+            # Clear existing histogram widget
             if hasattr(self, 'histogram_canvas') and self.histogram_canvas is not None:
                 self.histogram_canvas.setParent(None)
                 self.histogram_canvas.deleteLater()
 
-            # Create new histogram
-            fig, ax = plt.subplots(figsize=(4, 1.5))
-            fig.patch.set_facecolor('#f0f0f0')
-            ax.set_facecolor('#f0f0f0')
+            # Compute histogram bins
+            counts, bin_edges = np.histogram(screen_top_values, bins=20)
+            bar_width = bin_edges[1] - bin_edges[0]
+            x = bin_edges[:-1]
 
-            # Plot histogram
-            n, bins, patches = ax.hist(screen_top_values, bins=20, color='#0066cc',
-                                        edgecolor='white', alpha=0.7)
+            # Create PyQtGraph plot widget
+            plot_widget = pg.PlotWidget()
+            plot_widget.setBackground('#f0f0f0')
+            plot_widget.setMaximumHeight(120)
+            plot_widget.setLabel('bottom', 'Top Filter Depth (m NAP)', size='7pt')
+            plot_widget.setLabel('left', 'Count', size='7pt')
 
-            # Highlight filtered range if set
+            # Blue bars for all data
+            plot_widget.addItem(pg.BarGraphItem(
+                x=x, height=counts, width=bar_width * 0.9, brush='#0066cc'
+            ))
+
+            # Green overlay for filtered range
             if filter_min is not None and filter_max is not None:
-                for i, (left, right) in enumerate(zip(bins[:-1], bins[1:])):
-                    if left >= filter_min and right <= filter_max:
-                        patches[i].set_facecolor('#00cc66')
+                mask = (x >= filter_min) & ((x + bar_width) <= filter_max)
+                if mask.any():
+                    plot_widget.addItem(pg.BarGraphItem(
+                        x=x[mask], height=counts[mask], width=bar_width * 0.9, brush='#00cc66'
+                    ))
 
-            ax.set_xlabel('Top Filter Depth (m NAP)', fontsize=8)
-            ax.set_ylabel('Count', fontsize=8)
-            ax.tick_params(axis='both', labelsize=7)
-
-            # Update spin box ranges based on data
+            # Update spin box ranges
             data_min = min(screen_top_values)
             data_max = max(screen_top_values)
             self.dlg.spinMinDepth.setMinimum(data_min - 10)
@@ -894,19 +899,15 @@ class BROGrondwaterPlugin:
             self.dlg.spinMaxDepth.setMinimum(data_min - 10)
             self.dlg.spinMaxDepth.setMaximum(data_max + 10)
 
-            # Set default values to cover all data
             if filter_min is None:
                 self.dlg.spinMinDepth.setValue(data_min)
                 self.dlg.spinMaxDepth.setValue(data_max)
 
-            fig.tight_layout()
-
             # Embed in dialog
-            self.histogram_canvas = FigureCanvasQTAgg(fig)
+            self.histogram_canvas = plot_widget
             self.dlg.frameHistogram.layout().addWidget(self.histogram_canvas)
 
         except Exception as e:
-            # Histogram is not critical, just log error
             print(f"Error creating histogram: {e}")
 
     def _get_measurements_for_well(self, bro_id, tube_nr, name=None):
@@ -991,8 +992,8 @@ class BROGrondwaterPlugin:
         except:
             return None, None
 
-    def _save_plot(self, fig):
-        """Save the current plot to a file."""
+    def _save_plot(self, plot_widget):
+        """Save the current plot as a PNG image."""
         from datetime import datetime
         default_filename = f"BRO_GMW_plot_{datetime.now().strftime('%y%m%d')}.png"
         downloads_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
@@ -1004,10 +1005,10 @@ class BROGrondwaterPlugin:
             self.dlg,
             "Save Plot",
             default_path,
-            "PNG Files (*.png);;PDF Files (*.pdf);;SVG Files (*.svg)"
+            "PNG Files (*.png)"
         )
         if file_path:
-            fig.savefig(file_path, dpi=150, bbox_inches='tight')
+            plot_widget.grab().save(file_path)
             self.dlg.statusLabel.setText(f"Plot saved to {os.path.basename(file_path)}")
 
     def plot_measurements(self):
@@ -1022,52 +1023,52 @@ class BROGrondwaterPlugin:
 
         self._start_operation()
         try:
-            # Fix stdout/stderr for QGIS
-            import io
-            if sys.stdout is None:
-                sys.stdout = io.StringIO()
-            if sys.stderr is None:
-                sys.stderr = io.StringIO()
-
-            import matplotlib.pyplot as plt
-            from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
-            from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton
+            import pyqtgraph as pg
+            from datetime import datetime as dt
+            from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton
 
             # Create plot dialog
             plot_dialog = QDialog(self.dlg)
             plot_dialog.setWindowTitle("Grondwaterstand")
-            plot_dialog.resize(800, 600)
+            plot_dialog.resize(800, 500)
             layout = QVBoxLayout()
 
-            fig, ax = plt.subplots(figsize=(10, 6))
+            # Time series plot with date axis
+            date_axis = pg.DateAxisItem(orientation='bottom')
+            plot_widget = pg.PlotWidget(axisItems={'bottom': date_axis})
+            plot_widget.setBackground('w')
+            plot_widget.showGrid(x=True, y=True, alpha=0.3)
+            plot_widget.setLabel('left', 'Stijghoogte (m NAP)')
+            plot_widget.setLabel('bottom', 'Datum')
+            plot_widget.setTitle('Grondwaterstand')
+            plot_widget.addLegend()
+
+            colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+                      '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
 
             self.dlg.statusLabel.setText("Creating plot...")
-
-            # Plot all downloaded measurements
             plotted_count = 0
-            from datetime import datetime as dt
-            for cache_key, measurement in self._downloaded_measurements.items():
+
+            for i, (cache_key, measurement) in enumerate(self._downloaded_measurements.items()):
                 series_data = measurement.get('data')
                 name = measurement['name']
                 bro_id = measurement['bro_id']
 
                 if series_data and series_data.get('dates') and series_data.get('values'):
-                    # Extract GMW id for label
-                    import re
                     gmw_match = re.search(r'GMW\d+', str(name) + str(bro_id))
                     label = gmw_match.group(0) if gmw_match else (name or bro_id)
 
-                    # Parse dates and get values
-                    dates = [dt.fromisoformat(d) for d in series_data['dates']]
+                    timestamps = [dt.fromisoformat(d).timestamp() for d in series_data['dates']]
                     values = series_data['values']
 
-                    if dates and values:
-                        ax.plot(dates, values, label=label)
+                    if timestamps and values:
+                        color = colors[i % len(colors)]
+                        plot_widget.plot(timestamps, values, name=label,
+                                         pen=pg.mkPen(color=color, width=1.5))
                         plotted_count += 1
 
             if self._cancelled:
                 self.dlg.statusLabel.setText("Cancelled")
-                plt.close(fig)
                 return
 
             if plotted_count == 0:
@@ -1079,24 +1080,11 @@ class BROGrondwaterPlugin:
                 self.dlg.statusLabel.setText("Ready")
                 return
 
-            ax.set_xlabel('Datum')
-            ax.set_ylabel('Stijghoogte (m NAP)')
-            ax.set_title('Grondwaterstand')
-            ax.legend()
-            ax.grid(True, alpha=0.3)
-            plt.tight_layout()
+            layout.addWidget(plot_widget)
 
-            canvas = FigureCanvasQTAgg(fig)
-
-            # Add navigation toolbar with save button
-            toolbar = NavigationToolbar2QT(canvas, plot_dialog)
-            layout.addWidget(toolbar)
-            layout.addWidget(canvas)
-
-            # Add custom save button
             btn_layout = QHBoxLayout()
             btn_save = QPushButton("Save as PNG")
-            btn_save.clicked.connect(lambda: self._save_plot(fig))
+            btn_save.clicked.connect(lambda: self._save_plot(plot_widget))
             btn_layout.addStretch()
             btn_layout.addWidget(btn_save)
             layout.addLayout(btn_layout)
@@ -1105,15 +1093,8 @@ class BROGrondwaterPlugin:
 
             self.dlg.progressBar.setValue(100)
             self.dlg.statusLabel.setText(f"Plot created ({plotted_count} wells)")
-            plot_dialog.exec_()
+            plot_dialog.exec()
 
-        except ImportError:
-            QMessageBox.critical(
-                self.dlg,
-                "Import Error",
-                "Matplotlib is required for plotting. Please install it using:\n"
-                "pip install matplotlib"
-            )
         except Exception as e:
             QMessageBox.critical(
                 self.dlg,
