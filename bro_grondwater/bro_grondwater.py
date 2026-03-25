@@ -161,10 +161,10 @@ class BROGrondwaterPlugin:
             # Create dock widget and add panel
             self.dock_widget = QDockWidget("BRO Grondwater", self.iface.mainWindow())
             self.dock_widget.setWidget(self.dlg)
-            self.dock_widget.setAllowedAreas(Qt.LeftDockWidgetArea | Qt.RightDockWidgetArea)
+            self.dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
 
-            # Add to QGIS interface on the right side
-            self.iface.addDockWidget(Qt.RightDockWidgetArea, self.dock_widget)
+            # Add to QGIS interface on the right side (can be docked alongside Processing Toolbox)
+            self.iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dock_widget)
 
         # Show/toggle the dock widget
         if self.dock_widget.isVisible():
@@ -637,7 +637,7 @@ class BROGrondwaterPlugin:
 
         # Start ThreadPoolExecutor
         try:
-            self._executor = ThreadPoolExecutor(max_workers=8)
+            self._executor = ThreadPoolExecutor(max_workers=3)
 
             # Submit all downloads
             for feature_data in features_to_download:
@@ -660,6 +660,8 @@ class BROGrondwaterPlugin:
     def _download_single_well(self, feature_data):
         """Download measurements for a single well (runs in thread)."""
         import hydropandas as hpd
+        import math
+        import time
 
         bro_id = feature_data['bro_id']
         name = feature_data['name']
@@ -685,57 +687,69 @@ class BROGrondwaterPlugin:
                 'tube_nr': tube_nr
             }
 
-        try:
-            obs = hpd.GroundwaterObs.from_bro(gmw_id, tube_nr or 1)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                obs = hpd.GroundwaterObs.from_bro(gmw_id, tube_nr or 1)
 
-            if obs is not None and len(obs) > 0:
-                # Serialize the observation data
-                dates = [d.isoformat() for d in obs.index.tolist()]
-                values = obs.iloc[:, 0].tolist()
+                if obs is not None and len(obs) > 0:
+                    # Serialize the observation data, filtering out NaN values
+                    raw_values = obs.iloc[:, 0].tolist()
+                    valid_pairs = [
+                        (d.isoformat(), v)
+                        for d, v in zip(obs.index.tolist(), raw_values)
+                        if not (isinstance(v, float) and math.isnan(v))
+                    ]
+                    dates = [p[0] for p in valid_pairs]
+                    values = [p[1] for p in valid_pairs]
 
-                # Extract metadata from obs object
-                metadata = {
-                    'tube_nr': getattr(obs, 'tube_nr', tube_nr),
-                    'x': getattr(obs, 'x', None),
-                    'y': getattr(obs, 'y', None),
-                    'ground_level': getattr(obs, 'ground_level', None),
-                    'screen_top': getattr(obs, 'screen_top', None),
-                    'screen_bottom': getattr(obs, 'screen_bottom', None),
-                    'tube_top': getattr(obs, 'tube_top', None),
-                    'source': getattr(obs, 'source', 'BRO'),
-                    'unit': getattr(obs, 'unit', 'm NAP'),
-                }
+                    # Extract metadata from obs object
+                    metadata = {
+                        'tube_nr': getattr(obs, 'tube_nr', tube_nr),
+                        'x': getattr(obs, 'x', None),
+                        'y': getattr(obs, 'y', None),
+                        'ground_level': getattr(obs, 'ground_level', None),
+                        'screen_top': getattr(obs, 'screen_top', None),
+                        'screen_bottom': getattr(obs, 'screen_bottom', None),
+                        'tube_top': getattr(obs, 'tube_top', None),
+                        'source': getattr(obs, 'source', 'BRO'),
+                        'unit': getattr(obs, 'unit', 'm NAP'),
+                    }
 
-                return {
-                    'success': True,
-                    'cache_key': cache_key,
-                    'data': {
-                        'dates': dates,
-                        'values': values,
-                        'metadata': metadata,
-                    },
-                    'name': name,
-                    'bro_id': bro_id,
-                    'tube_nr': tube_nr
-                }
-            else:
+                    return {
+                        'success': True,
+                        'cache_key': cache_key,
+                        'data': {
+                            'dates': dates,
+                            'values': values,
+                            'metadata': metadata,
+                        },
+                        'name': name,
+                        'bro_id': bro_id,
+                        'tube_nr': tube_nr
+                    }
+                else:
+                    return {
+                        'success': False,
+                        'cache_key': cache_key,
+                        'error': 'No data returned',
+                        'name': name,
+                        'bro_id': bro_id,
+                        'tube_nr': tube_nr
+                    }
+            except Exception as e:
+                error_str = str(e)
+                if ('429' in error_str or 'Too Many Requests' in error_str) and attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)  # exponential backoff: 1s, 2s
+                    continue
                 return {
                     'success': False,
                     'cache_key': cache_key,
-                    'error': 'No data returned',
+                    'error': error_str,
                     'name': name,
                     'bro_id': bro_id,
                     'tube_nr': tube_nr
                 }
-        except Exception as e:
-            return {
-                'success': False,
-                'cache_key': cache_key,
-                'error': str(e),
-                'name': name,
-                'bro_id': bro_id,
-                'tube_nr': tube_nr
-            }
 
     def _poll_download_results(self):
         """Poll for results from worker threads."""
@@ -826,53 +840,24 @@ class BROGrondwaterPlugin:
         if self.wells_layer is None:
             return
 
+        # Save the current filter so we can always restore it
+        saved_filter = self.wells_layer.subsetString()
+
         try:
-            import matplotlib.pyplot as plt
-            from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg
             import numpy as np
 
-            # Get screen_top values from the layer (unfiltered)
-            self.wells_layer.setSubsetString('')  # Temporarily remove filter
+            # Temporarily remove filter to get all values
+            self.wells_layer.setSubsetString('')
             screen_top_values = []
             for feature in self.wells_layer.getFeatures():
                 val = feature['screen_top']
                 if val is not None:
                     screen_top_values.append(val)
 
-            # Restore filter if set
-            if filter_min is not None and filter_max is not None and filter_max > filter_min:
-                self.wells_layer.setSubsetString(
-                    f'"screen_top" >= {filter_min} AND "screen_top" <= {filter_max}'
-                )
-
             if not screen_top_values:
                 return
 
-            # Clear existing histogram
-            if hasattr(self, 'histogram_canvas') and self.histogram_canvas is not None:
-                self.histogram_canvas.setParent(None)
-                self.histogram_canvas.deleteLater()
-
-            # Create new histogram
-            fig, ax = plt.subplots(figsize=(4, 1.5))
-            fig.patch.set_facecolor('#f0f0f0')
-            ax.set_facecolor('#f0f0f0')
-
-            # Plot histogram
-            n, bins, patches = ax.hist(screen_top_values, bins=20, color='#0066cc',
-                                        edgecolor='white', alpha=0.7)
-
-            # Highlight filtered range if set
-            if filter_min is not None and filter_max is not None:
-                for i, (left, right) in enumerate(zip(bins[:-1], bins[1:])):
-                    if left >= filter_min and right <= filter_max:
-                        patches[i].set_facecolor('#00cc66')
-
-            ax.set_xlabel('Top Filter Depth (m NAP)', fontsize=8)
-            ax.set_ylabel('Count', fontsize=8)
-            ax.tick_params(axis='both', labelsize=7)
-
-            # Update spin box ranges based on data
+            # Update spin box ranges
             data_min = min(screen_top_values)
             data_max = max(screen_top_values)
             self.dlg.spinMinDepth.setMinimum(data_min - 10)
@@ -880,20 +865,59 @@ class BROGrondwaterPlugin:
             self.dlg.spinMaxDepth.setMinimum(data_min - 10)
             self.dlg.spinMaxDepth.setMaximum(data_max + 10)
 
-            # Set default values to cover all data
             if filter_min is None:
                 self.dlg.spinMinDepth.setValue(data_min)
-                self.dlg.spinMaxDepth.setValue(data_max)
+                self.dlg.spinMaxDepth.setValue(data_max + 0.1)
 
-            fig.tight_layout()
+            # Try to draw histogram — non-critical, filter works regardless
+            try:
+                import pyqtgraph as pg
 
-            # Embed in dialog
-            self.histogram_canvas = FigureCanvasQTAgg(fig)
-            self.dlg.frameHistogram.layout().addWidget(self.histogram_canvas)
+                # Clear existing histogram widget
+                if hasattr(self, 'histogram_canvas') and self.histogram_canvas is not None:
+                    self.histogram_canvas.setParent(None)
+                    self.histogram_canvas.deleteLater()
+
+                counts, bin_edges = np.histogram(screen_top_values, bins=20)
+                bar_width = bin_edges[1] - bin_edges[0]
+                x = bin_edges[:-1]
+
+                plot_widget = pg.PlotWidget()
+                plot_widget.setBackground('#f0f0f0')
+                plot_widget.hideAxis('left')
+                bottom_axis = plot_widget.getAxis('bottom')
+                bottom_axis.setStyle(tickLength=3, tickTextOffset=1)
+                from qgis.PyQt.QtGui import QFont
+                bottom_axis.setTickFont(QFont('Arial', 6))
+                plot_widget.getPlotItem().setContentsMargins(0, 0, 0, 0)
+
+                plot_widget.addItem(pg.BarGraphItem(
+                    x=x, height=counts, width=bar_width * 0.9, brush='#0066cc'
+                ))
+
+                if filter_min is not None and filter_max is not None:
+                    mask = (x >= filter_min) & ((x + bar_width) <= filter_max)
+                    if mask.any():
+                        plot_widget.addItem(pg.BarGraphItem(
+                            x=x[mask], height=counts[mask], width=bar_width * 0.9, brush='#00cc66'
+                        ))
+
+                self.histogram_canvas = plot_widget
+                self.dlg.frameHistogram.layout().addWidget(self.histogram_canvas)
+
+            except Exception as e:
+                print(f"Histogram display unavailable: {e}")
 
         except Exception as e:
-            # Histogram is not critical, just log error
-            print(f"Error creating histogram: {e}")
+            print(f"Error reading screen_top values: {e}")
+        finally:
+            # Always restore the filter
+            if filter_min is not None and filter_max is not None and filter_max > filter_min:
+                self.wells_layer.setSubsetString(
+                    f'"screen_top" >= {filter_min} AND "screen_top" <= {filter_max}'
+                )
+            else:
+                self.wells_layer.setSubsetString(saved_filter)
 
     def _get_measurements_for_well(self, bro_id, tube_nr, name=None):
         """Fetch measurements for a single well on-demand."""
@@ -977,8 +1001,8 @@ class BROGrondwaterPlugin:
         except:
             return None, None
 
-    def _save_plot(self, fig):
-        """Save the current plot to a file."""
+    def _save_plot(self, plot_widget):
+        """Save the current plot as a PNG image."""
         from datetime import datetime
         default_filename = f"BRO_GMW_plot_{datetime.now().strftime('%y%m%d')}.png"
         downloads_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
@@ -990,10 +1014,10 @@ class BROGrondwaterPlugin:
             self.dlg,
             "Save Plot",
             default_path,
-            "PNG Files (*.png);;PDF Files (*.pdf);;SVG Files (*.svg)"
+            "PNG Files (*.png)"
         )
         if file_path:
-            fig.savefig(file_path, dpi=150, bbox_inches='tight')
+            plot_widget.grab().save(file_path)
             self.dlg.statusLabel.setText(f"Plot saved to {os.path.basename(file_path)}")
 
     def plot_measurements(self):
@@ -1008,52 +1032,64 @@ class BROGrondwaterPlugin:
 
         self._start_operation()
         try:
-            # Fix stdout/stderr for QGIS
-            import io
-            if sys.stdout is None:
-                sys.stdout = io.StringIO()
-            if sys.stderr is None:
-                sys.stderr = io.StringIO()
-
-            import matplotlib.pyplot as plt
-            from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT
-            from PyQt5.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton
+            try:
+                import pyqtgraph as pg
+            except ImportError:
+                QMessageBox.critical(
+                    self.dlg,
+                    "Missing Dependency",
+                    "pyqtgraph is not yet installed.\n\n"
+                    "Please restart QGIS to trigger automatic installation, "
+                    "or install it manually via OSGeo4W Shell:\n"
+                    "  pip install pyqtgraph"
+                )
+                return
+            from datetime import datetime as dt
+            from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QToolButton, QButtonGroup
+            from qgis.PyQt.QtCore import QSize
 
             # Create plot dialog
             plot_dialog = QDialog(self.dlg)
             plot_dialog.setWindowTitle("Grondwaterstand")
-            plot_dialog.resize(800, 600)
+            plot_dialog.resize(800, 500)
             layout = QVBoxLayout()
 
-            fig, ax = plt.subplots(figsize=(10, 6))
+            # Time series plot with date axis
+            date_axis = pg.DateAxisItem(orientation='bottom')
+            plot_widget = pg.PlotWidget(axisItems={'bottom': date_axis})
+            plot_widget.setBackground('w')
+            plot_widget.showGrid(x=True, y=True, alpha=0.3)
+            plot_widget.setLabel('left', 'Stijghoogte (m NAP)')
+            plot_widget.setLabel('bottom', 'Datum')
+            plot_widget.setTitle('Grondwaterstand')
+            plot_widget.addLegend()
+
+            colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
+                      '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
 
             self.dlg.statusLabel.setText("Creating plot...")
-
-            # Plot all downloaded measurements
             plotted_count = 0
-            from datetime import datetime as dt
-            for cache_key, measurement in self._downloaded_measurements.items():
+
+            for i, (cache_key, measurement) in enumerate(self._downloaded_measurements.items()):
                 series_data = measurement.get('data')
                 name = measurement['name']
                 bro_id = measurement['bro_id']
 
                 if series_data and series_data.get('dates') and series_data.get('values'):
-                    # Extract GMW id for label
-                    import re
                     gmw_match = re.search(r'GMW\d+', str(name) + str(bro_id))
                     label = gmw_match.group(0) if gmw_match else (name or bro_id)
 
-                    # Parse dates and get values
-                    dates = [dt.fromisoformat(d) for d in series_data['dates']]
+                    timestamps = [dt.fromisoformat(d).timestamp() for d in series_data['dates']]
                     values = series_data['values']
 
-                    if dates and values:
-                        ax.plot(dates, values, label=label)
+                    if timestamps and values:
+                        color = colors[i % len(colors)]
+                        plot_widget.plot(timestamps, values, name=label,
+                                         pen=pg.mkPen(color=color, width=1.5))
                         plotted_count += 1
 
             if self._cancelled:
                 self.dlg.statusLabel.setText("Cancelled")
-                plt.close(fig)
                 return
 
             if plotted_count == 0:
@@ -1065,41 +1101,65 @@ class BROGrondwaterPlugin:
                 self.dlg.statusLabel.setText("Ready")
                 return
 
-            ax.set_xlabel('Datum')
-            ax.set_ylabel('Stijghoogte (m NAP)')
-            ax.set_title('Grondwaterstand')
-            ax.legend()
-            ax.grid(True, alpha=0.3)
-            plt.tight_layout()
+            # Toolbar
+            toolbar = QHBoxLayout()
+            toolbar.setSpacing(4)
 
-            canvas = FigureCanvasQTAgg(fig)
+            vb = plot_widget.getViewBox()
 
-            # Add navigation toolbar with save button
-            toolbar = NavigationToolbar2QT(canvas, plot_dialog)
-            layout.addWidget(toolbar)
-            layout.addWidget(canvas)
+            btn_pan = QToolButton()
+            btn_pan.setText("Pan")
+            btn_pan.setToolTip("Pan mode: drag to scroll")
+            btn_pan.setCheckable(True)
+            btn_pan.setChecked(True)
 
-            # Add custom save button
-            btn_layout = QHBoxLayout()
+            btn_zoom = QToolButton()
+            btn_zoom.setText("Zoom")
+            btn_zoom.setToolTip("Zoom mode: drag to draw zoom box")
+            btn_zoom.setCheckable(True)
+
+            mode_group = QButtonGroup()
+            mode_group.addButton(btn_pan)
+            mode_group.addButton(btn_zoom)
+            mode_group.setExclusive(True)
+
+            btn_pan.clicked.connect(lambda: vb.setMouseMode(vb.PanMode))
+            btn_zoom.clicked.connect(lambda: vb.setMouseMode(vb.RectMode))
+
+            btn_reset = QPushButton("Reset view")
+            btn_reset.setToolTip("Zoom to fit all data")
+            btn_reset.clicked.connect(lambda: plot_widget.autoRange())
+
+            btn_zoom_in = QPushButton("＋")
+            btn_zoom_in.setToolTip("Zoom in")
+            btn_zoom_in.setFixedWidth(32)
+            btn_zoom_in.clicked.connect(lambda: vb.scaleBy((0.7, 0.7)))
+
+            btn_zoom_out = QPushButton("－")
+            btn_zoom_out.setToolTip("Zoom out")
+            btn_zoom_out.setFixedWidth(32)
+            btn_zoom_out.clicked.connect(lambda: vb.scaleBy((1.4, 1.4)))
+
+            toolbar.addWidget(btn_pan)
+            toolbar.addWidget(btn_zoom)
+            toolbar.addWidget(btn_zoom_in)
+            toolbar.addWidget(btn_zoom_out)
+            toolbar.addWidget(btn_reset)
+            toolbar.addStretch()
+
             btn_save = QPushButton("Save as PNG")
-            btn_save.clicked.connect(lambda: self._save_plot(fig))
-            btn_layout.addStretch()
-            btn_layout.addWidget(btn_save)
-            layout.addLayout(btn_layout)
+            btn_save.clicked.connect(lambda: self._save_plot(plot_widget))
+            toolbar.addWidget(btn_save)
+
+            layout.addLayout(toolbar)
+            layout.addWidget(plot_widget)
 
             plot_dialog.setLayout(layout)
 
             self.dlg.progressBar.setValue(100)
             self.dlg.statusLabel.setText(f"Plot created ({plotted_count} wells)")
-            plot_dialog.exec_()
+            plot_dialog.exec()
 
-        except ImportError:
-            QMessageBox.critical(
-                self.dlg,
-                "Import Error",
-                "Matplotlib is required for plotting. Please install it using:\n"
-                "pip install matplotlib"
-            )
         except Exception as e:
             QMessageBox.critical(
                 self.dlg,
@@ -1156,9 +1216,10 @@ class BROGrondwaterPlugin:
 
             self.dlg.statusLabel.setText("Exporting to Excel...")
 
+            import math
+
             # Create workbook with xlsxwriter
-            # nan_inf_to_errors converts NaN to empty cells and Inf to #NUM! errors
-            workbook = xlsxwriter.Workbook(file_path, {'nan_inf_to_errors': True})
+            workbook = xlsxwriter.Workbook(file_path)
 
             # Add formats
             header_format = workbook.add_format({'bold': True, 'bg_color': '#D9E1F2'})
@@ -1225,9 +1286,9 @@ class BROGrondwaterPlugin:
             for row, meta in enumerate(metadata_list, 1):
                 for col, header in enumerate(meta_headers):
                     value = meta.get(header)
-                    meta_ws.write(row, col, value)
-                    # Update max width if this value is longer
-                    if value is not None:
+                    # Skip NaN values to avoid #GETAL errors in Dutch Excel
+                    if value is not None and not (isinstance(value, float) and math.isnan(value)):
+                        meta_ws.write(row, col, value)
                         col_widths[col] = max(col_widths[col], len(str(value)))
 
             # Apply column widths (add small padding, cap at 50)
