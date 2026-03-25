@@ -1,4 +1,2 @@
 # BRO grondwater plugin
-Een QGIS plugin om grondwaterstanden uit de BRO te downloaden.
-
-
+A QGIS plugin that can retrieve groundwater measurements from the Basisregistratie Ondergrond (BRO).
