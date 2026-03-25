@@ -637,7 +637,7 @@ class BROGrondwaterPlugin:
 
         # Start ThreadPoolExecutor
         try:
-            self._executor = ThreadPoolExecutor(max_workers=8)
+            self._executor = ThreadPoolExecutor(max_workers=3)
 
             # Submit all downloads
             for feature_data in features_to_download:
@@ -660,6 +660,8 @@ class BROGrondwaterPlugin:
     def _download_single_well(self, feature_data):
         """Download measurements for a single well (runs in thread)."""
         import hydropandas as hpd
+        import math
+        import time
 
         bro_id = feature_data['bro_id']
         name = feature_data['name']
@@ -685,57 +687,69 @@ class BROGrondwaterPlugin:
                 'tube_nr': tube_nr
             }
 
-        try:
-            obs = hpd.GroundwaterObs.from_bro(gmw_id, tube_nr or 1)
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                obs = hpd.GroundwaterObs.from_bro(gmw_id, tube_nr or 1)
 
-            if obs is not None and len(obs) > 0:
-                # Serialize the observation data
-                dates = [d.isoformat() for d in obs.index.tolist()]
-                values = obs.iloc[:, 0].tolist()
+                if obs is not None and len(obs) > 0:
+                    # Serialize the observation data, filtering out NaN values
+                    raw_values = obs.iloc[:, 0].tolist()
+                    valid_pairs = [
+                        (d.isoformat(), v)
+                        for d, v in zip(obs.index.tolist(), raw_values)
+                        if not (isinstance(v, float) and math.isnan(v))
+                    ]
+                    dates = [p[0] for p in valid_pairs]
+                    values = [p[1] for p in valid_pairs]
 
-                # Extract metadata from obs object
-                metadata = {
-                    'tube_nr': getattr(obs, 'tube_nr', tube_nr),
-                    'x': getattr(obs, 'x', None),
-                    'y': getattr(obs, 'y', None),
-                    'ground_level': getattr(obs, 'ground_level', None),
-                    'screen_top': getattr(obs, 'screen_top', None),
-                    'screen_bottom': getattr(obs, 'screen_bottom', None),
-                    'tube_top': getattr(obs, 'tube_top', None),
-                    'source': getattr(obs, 'source', 'BRO'),
-                    'unit': getattr(obs, 'unit', 'm NAP'),
-                }
+                    # Extract metadata from obs object
+                    metadata = {
+                        'tube_nr': getattr(obs, 'tube_nr', tube_nr),
+                        'x': getattr(obs, 'x', None),
+                        'y': getattr(obs, 'y', None),
+                        'ground_level': getattr(obs, 'ground_level', None),
+                        'screen_top': getattr(obs, 'screen_top', None),
+                        'screen_bottom': getattr(obs, 'screen_bottom', None),
+                        'tube_top': getattr(obs, 'tube_top', None),
+                        'source': getattr(obs, 'source', 'BRO'),
+                        'unit': getattr(obs, 'unit', 'm NAP'),
+                    }
 
-                return {
-                    'success': True,
-                    'cache_key': cache_key,
-                    'data': {
-                        'dates': dates,
-                        'values': values,
-                        'metadata': metadata,
-                    },
-                    'name': name,
-                    'bro_id': bro_id,
-                    'tube_nr': tube_nr
-                }
-            else:
+                    return {
+                        'success': True,
+                        'cache_key': cache_key,
+                        'data': {
+                            'dates': dates,
+                            'values': values,
+                            'metadata': metadata,
+                        },
+                        'name': name,
+                        'bro_id': bro_id,
+                        'tube_nr': tube_nr
+                    }
+                else:
+                    return {
+                        'success': False,
+                        'cache_key': cache_key,
+                        'error': 'No data returned',
+                        'name': name,
+                        'bro_id': bro_id,
+                        'tube_nr': tube_nr
+                    }
+            except Exception as e:
+                error_str = str(e)
+                if ('429' in error_str or 'Too Many Requests' in error_str) and attempt < max_retries - 1:
+                    time.sleep(2 ** attempt)  # exponential backoff: 1s, 2s
+                    continue
                 return {
                     'success': False,
                     'cache_key': cache_key,
-                    'error': 'No data returned',
+                    'error': error_str,
                     'name': name,
                     'bro_id': bro_id,
                     'tube_nr': tube_nr
                 }
-        except Exception as e:
-            return {
-                'success': False,
-                'cache_key': cache_key,
-                'error': str(e),
-                'name': name,
-                'bro_id': bro_id,
-                'tube_nr': tube_nr
-            }
 
     def _poll_download_results(self):
         """Poll for results from worker threads."""
@@ -1156,9 +1170,10 @@ class BROGrondwaterPlugin:
 
             self.dlg.statusLabel.setText("Exporting to Excel...")
 
+            import math
+
             # Create workbook with xlsxwriter
-            # nan_inf_to_errors converts NaN to empty cells and Inf to #NUM! errors
-            workbook = xlsxwriter.Workbook(file_path, {'nan_inf_to_errors': True})
+            workbook = xlsxwriter.Workbook(file_path)
 
             # Add formats
             header_format = workbook.add_format({'bold': True, 'bg_color': '#D9E1F2'})
@@ -1225,9 +1240,9 @@ class BROGrondwaterPlugin:
             for row, meta in enumerate(metadata_list, 1):
                 for col, header in enumerate(meta_headers):
                     value = meta.get(header)
-                    meta_ws.write(row, col, value)
-                    # Update max width if this value is longer
-                    if value is not None:
+                    # Skip NaN values to avoid #GETAL errors in Dutch Excel
+                    if value is not None and not (isinstance(value, float) and math.isnan(value)):
+                        meta_ws.write(row, col, value)
                         col_widths[col] = max(col_widths[col], len(str(value)))
 
             # Apply column widths (add small padding, cap at 50)
