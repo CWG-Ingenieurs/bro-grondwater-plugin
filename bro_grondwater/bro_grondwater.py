@@ -17,9 +17,20 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QTimer
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox, QDockWidget
-from qgis.core import (QgsProject, QgsVectorLayer, QgsRasterLayer, QgsFeature, QgsGeometry,
-                       QgsPointXY, QgsField, QgsCoordinateReferenceSystem,
-                       QgsCoordinateTransform, QgsRectangle, QgsMessageLog, Qgis)
+from qgis.core import (
+    QgsProject,
+    QgsVectorLayer,
+    QgsRasterLayer,
+    QgsFeature,
+    QgsGeometry,
+    QgsPointXY,
+    QgsField,
+    QgsCoordinateReferenceSystem,
+    QgsCoordinateTransform,
+    QgsRectangle,
+    QgsMessageLog,
+    Qgis,
+)
 from qgis.PyQt.QtCore import QVariant
 from .bro_grondwater_dialog import BROGrondwaterPluginPanel
 
@@ -37,13 +48,12 @@ class BROGrondwaterPlugin:
         """
         self.iface = iface
         self.plugin_dir = os.path.dirname(__file__)
-        
+
         # initialize locale
-        locale = QSettings().value('locale/userLocale')[0:2]
+        locale = QSettings().value("locale/userLocale")[0:2]
         locale_path = os.path.join(
-            self.plugin_dir,
-            'i18n',
-            'BROGrondwaterPlugin_{}.qm'.format(locale))
+            self.plugin_dir, "i18n", "BROGrondwaterPlugin_{}.qm".format(locale)
+        )
 
         if os.path.exists(locale_path):
             self.translator = QTranslator()
@@ -52,10 +62,10 @@ class BROGrondwaterPlugin:
 
         # Declare instance attributes
         self.actions = []
-        self.menu = self.tr(u'&BRO Grondwater Plugin')
-        self.toolbar = self.iface.addToolBar(u'BROGrondwaterPlugin')
-        self.toolbar.setObjectName(u'BROGrondwaterPlugin')
-        
+        self.menu = self.tr("&BRO Grondwater Plugin")
+        self.toolbar = self.iface.addToolBar("BROGrondwaterPlugin")
+        self.toolbar.setObjectName("BROGrondwaterPlugin")
+
         self.dlg = None
         self.dock_widget = None
         self.wells_layer = None
@@ -77,7 +87,7 @@ class BROGrondwaterPlugin:
 
     def tr(self, message):
         """Get the translation for a string using Qt translation API."""
-        return QCoreApplication.translate('BROGrondwaterPlugin', message)
+        return QCoreApplication.translate("BROGrondwaterPlugin", message)
 
     def add_action(
         self,
@@ -89,7 +99,8 @@ class BROGrondwaterPlugin:
         add_to_toolbar=True,
         status_tip=None,
         whats_this=None,
-        parent=None):
+        parent=None,
+    ):
         """Add a toolbar icon to the toolbar."""
 
         icon = QIcon(icon_path)
@@ -107,9 +118,7 @@ class BROGrondwaterPlugin:
             self.toolbar.addAction(action)
 
         if add_to_menu:
-            self.iface.addPluginToMenu(
-                self.menu,
-                action)
+            self.iface.addPluginToMenu(self.menu, action)
 
         self.actions.append(action)
 
@@ -118,19 +127,18 @@ class BROGrondwaterPlugin:
     def initGui(self):
         """Create the menu entries and toolbar icons inside the QGIS GUI."""
 
-        icon_path = os.path.join(self.plugin_dir, 'icon.png')
+        icon_path = os.path.join(self.plugin_dir, "icon.png")
         self.add_action(
             icon_path,
-            text=self.tr(u'BRO Grondwater Plugin'),
+            text=self.tr("BRO Grondwater Plugin"),
             callback=self.run,
-            parent=self.iface.mainWindow())
+            parent=self.iface.mainWindow(),
+        )
 
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginMenu(
-                self.tr(u'&BRO Grondwater Plugin'),
-                action)
+            self.iface.removePluginMenu(self.tr("&BRO Grondwater Plugin"), action)
             self.iface.removeToolBarIcon(action)
         del self.toolbar
 
@@ -161,10 +169,15 @@ class BROGrondwaterPlugin:
             # Create dock widget and add panel
             self.dock_widget = QDockWidget("BRO Grondwater", self.iface.mainWindow())
             self.dock_widget.setWidget(self.dlg)
-            self.dock_widget.setAllowedAreas(Qt.DockWidgetArea.LeftDockWidgetArea | Qt.DockWidgetArea.RightDockWidgetArea)
+            self.dock_widget.setAllowedAreas(
+                Qt.DockWidgetArea.LeftDockWidgetArea
+                | Qt.DockWidgetArea.RightDockWidgetArea
+            )
 
             # Add to QGIS interface on the right side (can be docked alongside Processing Toolbox)
-            self.iface.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.dock_widget)
+            self.iface.addDockWidget(
+                Qt.DockWidgetArea.RightDockWidgetArea, self.dock_widget
+            )
 
         # Show/toggle the dock widget
         if self.dock_widget.isVisible():
@@ -176,6 +189,7 @@ class BROGrondwaterPlugin:
         """Add WMS layer with GMW locations from PDOK."""
         # Fix stdout/stderr for QGIS
         import io
+
         if sys.stdout is None:
             sys.stdout = io.StringIO()
         if sys.stderr is None:
@@ -212,21 +226,20 @@ class BROGrondwaterPlugin:
                 QMessageBox.warning(
                     self.dlg,
                     "WMS Error",
-                    "Could not load WMS layer. Check your internet connection."
+                    "Could not load WMS layer. Check your internet connection.",
                 )
                 self.wms_layer = None
 
         except Exception as e:
             QMessageBox.critical(
-                self.dlg,
-                "Error",
-                f"Error adding WMS layer:\n{str(e)}"
+                self.dlg, "Error", f"Error adding WMS layer:\n{str(e)}"
             )
 
     def add_basemap(self):
         """Add the BRT background basemap layer."""
         # Fix stdout/stderr for QGIS
         import io
+
         if sys.stdout is None:
             sys.stdout = io.StringIO()
         if sys.stderr is None:
@@ -258,7 +271,9 @@ class BROGrondwaterPlugin:
             )
 
             # Create layer using QgsRasterLayer with wms provider
-            self.basemap_layer = QgsRasterLayer(wmts_url, "BRT Achtergrondkaart (grijs)", "wms")
+            self.basemap_layer = QgsRasterLayer(
+                wmts_url, "BRT Achtergrondkaart (grijs)", "wms"
+            )
 
             if self.basemap_layer.isValid():
                 # First add to project with addToLegend=True (default)
@@ -287,16 +302,12 @@ class BROGrondwaterPlugin:
                     "Basemap Error",
                     "Could not load basemap. Check your internet connection.\n\n"
                     "You can manually add the BRT basemap via:\n"
-                    "Layer > Add Layer > Add WMS/WMTS Layer"
+                    "Layer > Add Layer > Add WMS/WMTS Layer",
                 )
                 self.basemap_layer = None
 
         except Exception as e:
-            QMessageBox.critical(
-                self.dlg,
-                "Error",
-                f"Error adding basemap:\n{str(e)}"
-            )
+            QMessageBox.critical(self.dlg, "Error", f"Error adding basemap:\n{str(e)}")
 
     def _start_operation(self):
         """Prepare UI for a long-running operation."""
@@ -330,6 +341,7 @@ class BROGrondwaterPlugin:
             try:
                 # Fix for tqdm writing to None stdout in QGIS
                 import io
+
                 if sys.stdout is None:
                     sys.stdout = io.StringIO()
                 if sys.stderr is None:
@@ -342,7 +354,7 @@ class BROGrondwaterPlugin:
                     "Missing Dependency",
                     "Hydropandas is not installed.\n\n"
                     "Install via OSGeo4W Shell:\n"
-                    "  pip install hydropandas pandas xlsxwriter matplotlib brodata"
+                    "  pip install hydropandas pandas xlsxwriter matplotlib brodata",
                 )
                 return
 
@@ -350,16 +362,16 @@ class BROGrondwaterPlugin:
             canvas = self.iface.mapCanvas()
             extent = canvas.extent()
             crs = canvas.mapSettings().destinationCrs()
-            
+
             self.dlg.progressBar.setValue(10)
             self.dlg.statusLabel.setText("Retrieving well locations from BRO...")
-            
+
             # Transform extent to RD (EPSG:28992) if needed (hydropandas default)
-            if crs.authid() != 'EPSG:28992':
+            if crs.authid() != "EPSG:28992":
                 transform = QgsCoordinateTransform(
                     crs,
-                    QgsCoordinateReferenceSystem('EPSG:28992'),
-                    QgsProject.instance()
+                    QgsCoordinateReferenceSystem("EPSG:28992"),
+                    QgsProject.instance(),
                 )
                 extent_rd = transform.transformBoundingBox(extent)
             else:
@@ -370,9 +382,9 @@ class BROGrondwaterPlugin:
                 extent_rd.xMinimum(),
                 extent_rd.xMaximum(),
                 extent_rd.yMinimum(),
-                extent_rd.yMaximum()
+                extent_rd.yMaximum(),
             )
-            
+
             self.dlg.progressBar.setValue(30)
 
             # Retrieve observations using hydropandas
@@ -387,107 +399,112 @@ class BROGrondwaterPlugin:
                         tmin=None,
                         tmax=None,
                         only_metadata=True,
-                        engine='brodata'
+                        engine="brodata",
                     )
-                    engine_used = 'brodata'
+                    engine_used = "brodata"
                 except TypeError:
                     # brodata engine not available, use default
                     obs_collection = hpd.read_bro(
-                        extent=extent_tuple,
-                        tmin=None,
-                        tmax=None,
-                        only_metadata=True
+                        extent=extent_tuple, tmin=None, tmax=None, only_metadata=True
                     )
-                    engine_used = 'default'
+                    engine_used = "default"
             except Exception as e:
                 QMessageBox.warning(
                     self.dlg,
                     "Retrieval Error",
                     f"Error retrieving data from BRO:\n{str(e)}\n\n"
-                    "Please check your internet connection and try again."
+                    "Please check your internet connection and try again.",
                 )
                 self.dlg.progressBar.setValue(0)
                 self.dlg.statusLabel.setText("Ready")
                 return
-            
+
             self.dlg.progressBar.setValue(60)
-            
+
             if len(obs_collection) == 0:
                 QMessageBox.information(
                     self.dlg,
                     "No Data",
-                    "No monitoring wells found in the current extent."
+                    "No monitoring wells found in the current extent.",
                 )
                 self.dlg.progressBar.setValue(0)
                 self.dlg.statusLabel.setText("Ready")
                 return
-            
+
             # Create vector layer
-            layer = QgsVectorLayer('Point?crs=EPSG:28992', 'BRO Monitoring Wells', 'memory')
+            layer = QgsVectorLayer(
+                "Point?crs=EPSG:28992", "BRO Monitoring Wells", "memory"
+            )
             provider = layer.dataProvider()
-            
+
             # Add fields (Hydropandas style naming)
-            provider.addAttributes([
-                QgsField('name', QVariant.String),
-                QgsField('bro_id', QVariant.String),
-                QgsField('x', QVariant.Double),
-                QgsField('y', QVariant.Double),
-                QgsField('ground_level', QVariant.Double),
-                QgsField('screen_top', QVariant.Double),
-                QgsField('screen_bottom', QVariant.Double),
-                QgsField('tube_top', QVariant.Double),
-                QgsField('tube_nr', QVariant.Int),
-            ])
+            provider.addAttributes(
+                [
+                    QgsField("name", QVariant.String),
+                    QgsField("bro_id", QVariant.String),
+                    QgsField("x", QVariant.Double),
+                    QgsField("y", QVariant.Double),
+                    QgsField("ground_level", QVariant.Double),
+                    QgsField("screen_top", QVariant.Double),
+                    QgsField("screen_bottom", QVariant.Double),
+                    QgsField("tube_top", QVariant.Double),
+                    QgsField("tube_nr", QVariant.Int),
+                ]
+            )
             layer.updateFields()
-            
+
             # Add features
             features = []
             for idx, row in obs_collection.iterrows():
-                obs = row['obs']
+                obs = row["obs"]
                 feature = QgsFeature()
 
                 # Get coordinates (assuming RD coordinates in metadata)
-                if hasattr(obs, 'x') and hasattr(obs, 'y'):
+                if hasattr(obs, "x") and hasattr(obs, "y"):
                     x, y = obs.x, obs.y
-                elif hasattr(obs, 'metadata') and 'x' in obs.metadata and 'y' in obs.metadata:
-                    x = obs.metadata['x']
-                    y = obs.metadata['y']
-                elif 'x' in row and 'y' in row:
-                    x, y = row['x'], row['y']
+                elif (
+                    hasattr(obs, "metadata")
+                    and "x" in obs.metadata
+                    and "y" in obs.metadata
+                ):
+                    x = obs.metadata["x"]
+                    y = obs.metadata["y"]
+                elif "x" in row and "y" in row:
+                    x, y = row["x"], row["y"]
                 else:
                     continue
 
                 feature.setGeometry(QgsGeometry.fromPointXY(QgsPointXY(x, y)))
 
                 # Get metadata from obs object or row
-                metadata = obs.metadata if hasattr(obs, 'metadata') else {}
+                metadata = obs.metadata if hasattr(obs, "metadata") else {}
 
                 # Set attributes
                 attributes = [
-                    obs.name if hasattr(obs, 'name') else row.get('name', ''),
-                    metadata.get('bro_id', row.get('bro_id', '')),
+                    obs.name if hasattr(obs, "name") else row.get("name", ""),
+                    metadata.get("bro_id", row.get("bro_id", "")),
                     x,
                     y,
-                    metadata.get('ground_level', row.get('ground_level', None)),
-                    metadata.get('screen_top', row.get('screen_top', None)),
-                    metadata.get('screen_bottom', row.get('screen_bottom', None)),
-                    metadata.get('tube_top', row.get('tube_top', None)),
-                    metadata.get('tube_nr', row.get('tube_nr', None)),
+                    metadata.get("ground_level", row.get("ground_level", None)),
+                    metadata.get("screen_top", row.get("screen_top", None)),
+                    metadata.get("screen_bottom", row.get("screen_bottom", None)),
+                    metadata.get("tube_top", row.get("tube_top", None)),
+                    metadata.get("tube_nr", row.get("tube_nr", None)),
                 ]
                 feature.setAttributes(attributes)
                 features.append(feature)
-            
+
             provider.addFeatures(features)
             layer.updateExtents()
-            
+
             self.dlg.progressBar.setValue(80)
-            
+
             # Add layer to map
             QgsProject.instance().addMapLayer(layer)
             self.wells_layer = layer
-            
+
             # Apply QML styling if available
-            qml_path = os.path.join(self.plugin_dir, 'styles', 'gmw.qml')
+            qml_path = os.path.join(self.plugin_dir, "styles", "gmw.qml")
             if os.path.exists(qml_path):
                 success, msg = layer.loadNamedStyle(qml_path)
                 if success:
@@ -496,9 +513,11 @@ class BROGrondwaterPlugin:
                     print(f"Failed to load style: {msg}")
             else:
                 print(f"Style file not found: {qml_path}")
-            
+
             self.dlg.progressBar.setValue(100)
-            self.dlg.statusLabel.setText(f"Retrieved {len(features)} wells (engine: {engine_used})")
+            self.dlg.statusLabel.setText(
+                f"Retrieved {len(features)} wells (engine: {engine_used})"
+            )
 
             # Store observation collection for later use
             self.obs_collection = obs_collection
@@ -506,19 +525,15 @@ class BROGrondwaterPlugin:
 
             # Update filter histogram with screen_top values
             self._update_filter_histogram()
-            
+
             QMessageBox.information(
                 self.dlg,
                 "Success",
-                f"Successfully retrieved {len(features)} monitoring wells."
+                f"Successfully retrieved {len(features)} monitoring wells.",
             )
-            
+
         except Exception as e:
-            QMessageBox.critical(
-                self.dlg,
-                "Error",
-                f"An error occurred:\n{str(e)}"
-            )
+            QMessageBox.critical(self.dlg, "Error", f"An error occurred:\n{str(e)}")
             self.dlg.statusLabel.setText("Error occurred")
         finally:
             self._end_operation()
@@ -526,11 +541,7 @@ class BROGrondwaterPlugin:
     def apply_filter(self):
         """Apply depth filter to the wells layer."""
         if self.wells_layer is None:
-            QMessageBox.warning(
-                self.dlg,
-                "No Layer",
-                "Please retrieve wells first."
-            )
+            QMessageBox.warning(self.dlg, "No Layer", "Please retrieve wells first.")
             return
 
         try:
@@ -539,7 +550,9 @@ class BROGrondwaterPlugin:
 
             # Build filter expression
             if max_depth > min_depth:
-                filter_expr = f'"screen_top" >= {min_depth} AND "screen_top" <= {max_depth}'
+                filter_expr = (
+                    f'"screen_top" >= {min_depth} AND "screen_top" <= {max_depth}'
+                )
             else:
                 filter_expr = f'"screen_top" >= {min_depth}'
 
@@ -550,7 +563,9 @@ class BROGrondwaterPlugin:
             self.iface.mapCanvas().refresh()
 
             filtered_count = self.wells_layer.featureCount()
-            self.dlg.statusLabel.setText(f"Filter applied: {filtered_count} wells visible")
+            self.dlg.statusLabel.setText(
+                f"Filter applied: {filtered_count} wells visible"
+            )
 
             # Zoom to filtered features if any
             if filtered_count > 0:
@@ -563,9 +578,7 @@ class BROGrondwaterPlugin:
 
         except Exception as e:
             QMessageBox.critical(
-                self.dlg,
-                "Filter Error",
-                f"Error applying filter:\n{str(e)}"
+                self.dlg, "Filter Error", f"Error applying filter:\n{str(e)}"
             )
 
     def download_measurements(self):
@@ -575,11 +588,7 @@ class BROGrondwaterPlugin:
         avoiding pyproj/PROJ conflicts with QGIS.
         """
         if self.wells_layer is None:
-            QMessageBox.warning(
-                self.dlg,
-                "No Layer",
-                "Please retrieve wells first."
-            )
+            QMessageBox.warning(self.dlg, "No Layer", "Please retrieve wells first.")
             return
 
         selected_features = self.wells_layer.selectedFeatures()
@@ -589,9 +598,7 @@ class BROGrondwaterPlugin:
             selected_features = list(self.wells_layer.getFeatures())
             if len(selected_features) == 0:
                 QMessageBox.warning(
-                    self.dlg,
-                    "No Wells",
-                    "No wells available to download."
+                    self.dlg, "No Wells", "No wells available to download."
                 )
                 return
 
@@ -600,14 +607,18 @@ class BROGrondwaterPlugin:
         for feature in selected_features:
             cache_key = f"{feature['bro_id']}_{feature['tube_nr']}_{feature['name']}"
             if cache_key not in self._downloaded_measurements:
-                features_to_download.append({
-                    'bro_id': feature['bro_id'],
-                    'name': feature['name'],
-                    'tube_nr': feature['tube_nr'],
-                })
+                features_to_download.append(
+                    {
+                        "bro_id": feature["bro_id"],
+                        "name": feature["name"],
+                        "tube_nr": feature["tube_nr"],
+                    }
+                )
 
         if len(features_to_download) == 0:
-            self.dlg.statusLabel.setText(f"All {len(selected_features)} wells already downloaded")
+            self.dlg.statusLabel.setText(
+                f"All {len(selected_features)} wells already downloaded"
+            )
             return
 
         # Warn user if downloading many wells
@@ -620,14 +631,16 @@ class BROGrondwaterPlugin:
                 "applying a filter first.\n\n"
                 f"Do you want to download the timeseries for all {len(features_to_download)} wells anyway?",
                 QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No
+                QMessageBox.No,
             )
             if reply != QMessageBox.Yes:
                 self.dlg.statusLabel.setText("Download cancelled")
                 return
 
         self._start_operation()
-        self.dlg.statusLabel.setText(f"Starting download of {len(features_to_download)} wells...")
+        self.dlg.statusLabel.setText(
+            f"Starting download of {len(features_to_download)} wells..."
+        )
 
         # Setup for threaded downloads
         self._expected_results = len(features_to_download)
@@ -651,9 +664,7 @@ class BROGrondwaterPlugin:
 
         except Exception as e:
             QMessageBox.critical(
-                self.dlg,
-                "Download Error",
-                f"Error starting download:\n{str(e)}"
+                self.dlg, "Download Error", f"Error starting download:\n{str(e)}"
             )
             self._end_operation()
 
@@ -663,28 +674,28 @@ class BROGrondwaterPlugin:
         import math
         import time
 
-        bro_id = feature_data['bro_id']
-        name = feature_data['name']
-        tube_nr = feature_data['tube_nr']
+        bro_id = feature_data["bro_id"]
+        name = feature_data["name"]
+        tube_nr = feature_data["tube_nr"]
         cache_key = f"{bro_id}_{tube_nr}_{name}"
 
         # Try to find GMW id
         gmw_id = None
         for candidate in [bro_id, name]:
-            if candidate and 'GMW' in str(candidate):
-                match = re.search(r'GMW\d+', str(candidate))
+            if candidate and "GMW" in str(candidate):
+                match = re.search(r"GMW\d+", str(candidate))
                 if match:
                     gmw_id = match.group(0)
                     break
 
         if not gmw_id:
             return {
-                'success': False,
-                'cache_key': cache_key,
-                'error': 'No GMW ID found',
-                'name': name,
-                'bro_id': bro_id,
-                'tube_nr': tube_nr
+                "success": False,
+                "cache_key": cache_key,
+                "error": "No GMW ID found",
+                "name": name,
+                "bro_id": bro_id,
+                "tube_nr": tube_nr,
             }
 
         max_retries = 3
@@ -705,50 +716,52 @@ class BROGrondwaterPlugin:
 
                     # Extract metadata from obs object
                     metadata = {
-                        'tube_nr': getattr(obs, 'tube_nr', tube_nr),
-                        'x': getattr(obs, 'x', None),
-                        'y': getattr(obs, 'y', None),
-                        'ground_level': getattr(obs, 'ground_level', None),
-                        'screen_top': getattr(obs, 'screen_top', None),
-                        'screen_bottom': getattr(obs, 'screen_bottom', None),
-                        'tube_top': getattr(obs, 'tube_top', None),
-                        'source': getattr(obs, 'source', 'BRO'),
-                        'unit': getattr(obs, 'unit', 'm NAP'),
+                        "tube_nr": getattr(obs, "tube_nr", tube_nr),
+                        "x": getattr(obs, "x", None),
+                        "y": getattr(obs, "y", None),
+                        "ground_level": getattr(obs, "ground_level", None),
+                        "screen_top": getattr(obs, "screen_top", None),
+                        "screen_bottom": getattr(obs, "screen_bottom", None),
+                        "tube_top": getattr(obs, "tube_top", None),
+                        "source": getattr(obs, "source", "BRO"),
+                        "unit": getattr(obs, "unit", "m NAP"),
                     }
 
                     return {
-                        'success': True,
-                        'cache_key': cache_key,
-                        'data': {
-                            'dates': dates,
-                            'values': values,
-                            'metadata': metadata,
+                        "success": True,
+                        "cache_key": cache_key,
+                        "data": {
+                            "dates": dates,
+                            "values": values,
+                            "metadata": metadata,
                         },
-                        'name': name,
-                        'bro_id': bro_id,
-                        'tube_nr': tube_nr
+                        "name": name,
+                        "bro_id": bro_id,
+                        "tube_nr": tube_nr,
                     }
                 else:
                     return {
-                        'success': False,
-                        'cache_key': cache_key,
-                        'error': 'No data returned',
-                        'name': name,
-                        'bro_id': bro_id,
-                        'tube_nr': tube_nr
+                        "success": False,
+                        "cache_key": cache_key,
+                        "error": "No data returned",
+                        "name": name,
+                        "bro_id": bro_id,
+                        "tube_nr": tube_nr,
                     }
             except Exception as e:
                 error_str = str(e)
-                if ('429' in error_str or 'Too Many Requests' in error_str) and attempt < max_retries - 1:
-                    time.sleep(2 ** attempt)  # exponential backoff: 1s, 2s
+                if (
+                    "429" in error_str or "Too Many Requests" in error_str
+                ) and attempt < max_retries - 1:
+                    time.sleep(2**attempt)  # exponential backoff: 1s, 2s
                     continue
                 return {
-                    'success': False,
-                    'cache_key': cache_key,
-                    'error': error_str,
-                    'name': name,
-                    'bro_id': bro_id,
-                    'tube_nr': tube_nr
+                    "success": False,
+                    "cache_key": cache_key,
+                    "error": error_str,
+                    "name": name,
+                    "bro_id": bro_id,
+                    "tube_nr": tube_nr,
                 }
 
     def _poll_download_results(self):
@@ -766,22 +779,25 @@ class BROGrondwaterPlugin:
 
             try:
                 result = future.result()
-                if result.get('success'):
-                    self._downloaded_measurements[result['cache_key']] = {
-                        'data': result['data'],
-                        'name': result['name'],
-                        'bro_id': result['bro_id'],
-                        'tube_nr': result['tube_nr']
+                if result.get("success"):
+                    self._downloaded_measurements[result["cache_key"]] = {
+                        "data": result["data"],
+                        "name": result["name"],
+                        "bro_id": result["bro_id"],
+                        "tube_nr": result["tube_nr"],
                     }
                     self._downloaded_count += 1
                 else:
                     QgsMessageLog.logMessage(
                         f"Download failed for {result.get('name', 'unknown')}: {result.get('error', 'Unknown')}",
-                        "BRO Grondwater", Qgis.Warning
+                        "BRO Grondwater",
+                        Qgis.Warning,
                     )
                     self._failed_count += 1
             except Exception as e:
-                QgsMessageLog.logMessage(f"Error processing result: {e}", "BRO Grondwater", Qgis.Warning)
+                QgsMessageLog.logMessage(
+                    f"Error processing result: {e}", "BRO Grondwater", Qgis.Warning
+                )
                 self._failed_count += 1
 
         # Update progress
@@ -789,7 +805,9 @@ class BROGrondwaterPlugin:
         if self._expected_results > 0:
             progress = int((completed / self._expected_results) * 100)
             self.dlg.progressBar.setValue(progress)
-            self.dlg.statusLabel.setText(f"Downloading: {completed}/{self._expected_results} completed")
+            self.dlg.statusLabel.setText(
+                f"Downloading: {completed}/{self._expected_results} completed"
+            )
 
         # Check if all done
         if completed >= self._expected_results and len(self._futures) == 0:
@@ -815,7 +833,9 @@ class BROGrondwaterPlugin:
         if failed_count > 0:
             status_msg += f" ({failed_count} failed)"
         self.dlg.labelDownloadStatus.setText(status_msg)
-        self.dlg.labelDownloadStatus.setStyleSheet("color: #006600; font-style: normal;")
+        self.dlg.labelDownloadStatus.setStyleSheet(
+            "color: #006600; font-style: normal;"
+        )
         self.dlg.statusLabel.setText(status_msg)
 
         self._end_operation()
@@ -847,10 +867,10 @@ class BROGrondwaterPlugin:
             import numpy as np
 
             # Temporarily remove filter to get all values
-            self.wells_layer.setSubsetString('')
+            self.wells_layer.setSubsetString("")
             screen_top_values = []
             for feature in self.wells_layer.getFeatures():
-                val = feature['screen_top']
+                val = feature["screen_top"]
                 if val is not None:
                     screen_top_values.append(val)
 
@@ -874,7 +894,10 @@ class BROGrondwaterPlugin:
                 import pyqtgraph as pg
 
                 # Clear existing histogram widget
-                if hasattr(self, 'histogram_canvas') and self.histogram_canvas is not None:
+                if (
+                    hasattr(self, "histogram_canvas")
+                    and self.histogram_canvas is not None
+                ):
                     self.histogram_canvas.setParent(None)
                     self.histogram_canvas.deleteLater()
 
@@ -883,24 +906,32 @@ class BROGrondwaterPlugin:
                 x = bin_edges[:-1]
 
                 plot_widget = pg.PlotWidget()
-                plot_widget.setBackground('#f0f0f0')
-                plot_widget.hideAxis('left')
-                bottom_axis = plot_widget.getAxis('bottom')
+                plot_widget.setBackground("#f0f0f0")
+                plot_widget.hideAxis("left")
+                bottom_axis = plot_widget.getAxis("bottom")
                 bottom_axis.setStyle(tickLength=3, tickTextOffset=1)
                 from qgis.PyQt.QtGui import QFont
-                bottom_axis.setTickFont(QFont('Arial', 6))
+
+                bottom_axis.setTickFont(QFont("Arial", 6))
                 plot_widget.getPlotItem().setContentsMargins(0, 0, 0, 0)
 
-                plot_widget.addItem(pg.BarGraphItem(
-                    x=x, height=counts, width=bar_width * 0.9, brush='#0066cc'
-                ))
+                plot_widget.addItem(
+                    pg.BarGraphItem(
+                        x=x, height=counts, width=bar_width * 0.9, brush="#0066cc"
+                    )
+                )
 
                 if filter_min is not None and filter_max is not None:
                     mask = (x >= filter_min) & ((x + bar_width) <= filter_max)
                     if mask.any():
-                        plot_widget.addItem(pg.BarGraphItem(
-                            x=x[mask], height=counts[mask], width=bar_width * 0.9, brush='#00cc66'
-                        ))
+                        plot_widget.addItem(
+                            pg.BarGraphItem(
+                                x=x[mask],
+                                height=counts[mask],
+                                width=bar_width * 0.9,
+                                brush="#00cc66",
+                            )
+                        )
 
                 self.histogram_canvas = plot_widget
                 self.dlg.frameHistogram.layout().addWidget(self.histogram_canvas)
@@ -912,7 +943,11 @@ class BROGrondwaterPlugin:
             print(f"Error reading screen_top values: {e}")
         finally:
             # Always restore the filter
-            if filter_min is not None and filter_max is not None and filter_max > filter_min:
+            if (
+                filter_min is not None
+                and filter_max is not None
+                and filter_max > filter_min
+            ):
                 self.wells_layer.setSubsetString(
                     f'"screen_top" >= {filter_min} AND "screen_top" <= {filter_max}'
                 )
@@ -923,6 +958,7 @@ class BROGrondwaterPlugin:
         """Fetch measurements for a single well on-demand."""
         # Fix for tqdm/numpy writing to None stdout in QGIS
         import io
+
         if sys.stdout is None:
             sys.stdout = io.StringIO()
         if sys.stderr is None:
@@ -933,10 +969,11 @@ class BROGrondwaterPlugin:
         # Try to find GMW id from bro_id or name
         gmw_id = None
         for candidate in [bro_id, name]:
-            if candidate and 'GMW' in str(candidate):
+            if candidate and "GMW" in str(candidate):
                 # Extract GMW id (format: GMW000000041261)
                 import re
-                match = re.search(r'GMW\d+', str(candidate))
+
+                match = re.search(r"GMW\d+", str(candidate))
                 if match:
                     gmw_id = match.group(0)
                     break
@@ -960,6 +997,7 @@ class BROGrondwaterPlugin:
         """
         # Fix stdout/stderr for QGIS
         import io
+
         if sys.stdout is None:
             sys.stdout = io.StringIO()
         if sys.stderr is None:
@@ -970,23 +1008,23 @@ class BROGrondwaterPlugin:
 
         # If it's a Series, try to convert to numeric
         if isinstance(obs, pd.Series):
-            numeric_vals = pd.to_numeric(obs, errors='coerce')
+            numeric_vals = pd.to_numeric(obs, errors="coerce")
             mask = ~np.isnan(numeric_vals)
             return obs.index[mask], numeric_vals[mask]
 
         # If it's a DataFrame, find the right column
-        if hasattr(obs, 'columns'):
+        if hasattr(obs, "columns"):
             # Try common column names for groundwater measurements
-            for col_name in ['values', 'stand', 'head', 'value']:
+            for col_name in ["values", "stand", "head", "value"]:
                 if col_name in obs.columns:
-                    vals = pd.to_numeric(obs[col_name], errors='coerce')
+                    vals = pd.to_numeric(obs[col_name], errors="coerce")
                     mask = ~np.isnan(vals)
                     return obs.index[mask], vals[mask]
 
             # Fall back to first numeric column
             for col in obs.columns:
                 try:
-                    vals = pd.to_numeric(obs[col], errors='coerce')
+                    vals = pd.to_numeric(obs[col], errors="coerce")
                     if vals.notna().any():
                         mask = ~np.isnan(vals)
                         return obs.index[mask], vals[mask]
@@ -995,7 +1033,7 @@ class BROGrondwaterPlugin:
 
         # Last resort: try obs.values directly but filter non-numeric
         try:
-            vals = pd.to_numeric(pd.Series(obs.values), errors='coerce')
+            vals = pd.to_numeric(pd.Series(obs.values), errors="coerce")
             mask = ~np.isnan(vals)
             return obs.index[mask], vals.values[mask]
         except:
@@ -1004,17 +1042,15 @@ class BROGrondwaterPlugin:
     def _save_plot(self, plot_widget):
         """Save the current plot as a PNG image."""
         from datetime import datetime
+
         default_filename = f"BRO_GMW_plot_{datetime.now().strftime('%y%m%d')}.png"
-        downloads_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
+        downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
         if not os.path.exists(downloads_folder):
-            downloads_folder = os.path.expanduser('~')
+            downloads_folder = os.path.expanduser("~")
         default_path = os.path.join(downloads_folder, default_filename)
 
         file_path, _ = QFileDialog.getSaveFileName(
-            self.dlg,
-            "Save Plot",
-            default_path,
-            "PNG Files (*.png)"
+            self.dlg, "Save Plot", default_path, "PNG Files (*.png)"
         )
         if file_path:
             plot_widget.grab().save(file_path)
@@ -1024,9 +1060,7 @@ class BROGrondwaterPlugin:
         """Plot measurements for downloaded wells."""
         if len(self._downloaded_measurements) == 0:
             QMessageBox.warning(
-                self.dlg,
-                "No Data",
-                "Please download measurements first (step 4)."
+                self.dlg, "No Data", "Please download measurements first (step 4)."
             )
             return
 
@@ -1041,11 +1075,18 @@ class BROGrondwaterPlugin:
                     "pyqtgraph is not yet installed.\n\n"
                     "Please restart QGIS to trigger automatic installation, "
                     "or install it manually via OSGeo4W Shell:\n"
-                    "  pip install pyqtgraph"
+                    "  pip install pyqtgraph",
                 )
                 return
             from datetime import datetime as dt
-            from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QToolButton, QButtonGroup
+            from qgis.PyQt.QtWidgets import (
+                QDialog,
+                QVBoxLayout,
+                QHBoxLayout,
+                QPushButton,
+                QToolButton,
+                QButtonGroup,
+            )
             from qgis.PyQt.QtCore import QSize
 
             # Create plot dialog
@@ -1055,37 +1096,59 @@ class BROGrondwaterPlugin:
             layout = QVBoxLayout()
 
             # Time series plot with date axis
-            date_axis = pg.DateAxisItem(orientation='bottom')
-            plot_widget = pg.PlotWidget(axisItems={'bottom': date_axis})
-            plot_widget.setBackground('w')
+            date_axis = pg.DateAxisItem(orientation="bottom")
+            plot_widget = pg.PlotWidget(axisItems={"bottom": date_axis})
+            plot_widget.setBackground("w")
             plot_widget.showGrid(x=True, y=True, alpha=0.3)
-            plot_widget.setLabel('left', 'Stijghoogte (m NAP)')
-            plot_widget.setLabel('bottom', 'Datum')
-            plot_widget.setTitle('Grondwaterstand')
+            plot_widget.setLabel("left", "Stijghoogte (m NAP)")
+            plot_widget.setLabel("bottom", "Datum")
+            plot_widget.setTitle("Grondwaterstand")
             plot_widget.addLegend()
 
-            colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd',
-                      '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+            colors = [
+                "#1f77b4",
+                "#ff7f0e",
+                "#2ca02c",
+                "#d62728",
+                "#9467bd",
+                "#8c564b",
+                "#e377c2",
+                "#7f7f7f",
+                "#bcbd22",
+                "#17becf",
+            ]
 
             self.dlg.statusLabel.setText("Creating plot...")
             plotted_count = 0
 
-            for i, (cache_key, measurement) in enumerate(self._downloaded_measurements.items()):
-                series_data = measurement.get('data')
-                name = measurement['name']
-                bro_id = measurement['bro_id']
+            for i, (cache_key, measurement) in enumerate(
+                self._downloaded_measurements.items()
+            ):
+                series_data = measurement.get("data")
+                name = measurement["name"]
+                bro_id = measurement["bro_id"]
 
-                if series_data and series_data.get('dates') and series_data.get('values'):
-                    gmw_match = re.search(r'GMW\d+', str(name) + str(bro_id))
+                if (
+                    series_data
+                    and series_data.get("dates")
+                    and series_data.get("values")
+                ):
+                    gmw_match = re.search(r"GMW\d+", str(name) + str(bro_id))
                     label = gmw_match.group(0) if gmw_match else (name or bro_id)
 
-                    timestamps = [dt.fromisoformat(d).timestamp() for d in series_data['dates']]
-                    values = series_data['values']
+                    timestamps = [
+                        dt.fromisoformat(d).timestamp() for d in series_data["dates"]
+                    ]
+                    values = series_data["values"]
 
                     if timestamps and values:
                         color = colors[i % len(colors)]
-                        plot_widget.plot(timestamps, values, name=label,
-                                         pen=pg.mkPen(color=color, width=1.5))
+                        plot_widget.plot(
+                            timestamps,
+                            values,
+                            name=label,
+                            pen=pg.mkPen(color=color, width=1.5),
+                        )
                         plotted_count += 1
 
             if self._cancelled:
@@ -1096,7 +1159,7 @@ class BROGrondwaterPlugin:
                 QMessageBox.warning(
                     self.dlg,
                     "No Data",
-                    "No numeric measurement data found for the selected wells."
+                    "No numeric measurement data found for the selected wells.",
                 )
                 self.dlg.statusLabel.setText("Ready")
                 return
@@ -1162,9 +1225,7 @@ class BROGrondwaterPlugin:
 
         except Exception as e:
             QMessageBox.critical(
-                self.dlg,
-                "Plot Error",
-                f"Error creating plot:\n{str(e)}"
+                self.dlg, "Plot Error", f"Error creating plot:\n{str(e)}"
             )
         finally:
             self._end_operation()
@@ -1173,29 +1234,25 @@ class BROGrondwaterPlugin:
         """Export downloaded measurements to Excel using xlsxwriter for proper chart support."""
         if len(self._downloaded_measurements) == 0:
             QMessageBox.warning(
-                self.dlg,
-                "No Data",
-                "Please download measurements first (step 4)."
+                self.dlg, "No Data", "Please download measurements first (step 4)."
             )
             return
 
         # Generate default filename with date and time to avoid overwriting
         from datetime import datetime
+
         default_filename = f"BRO_GMW_{datetime.now().strftime('%y%m%d_%H%M%S')}.xlsx"
 
         # Get Downloads folder
-        downloads_folder = os.path.join(os.path.expanduser('~'), 'Downloads')
+        downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
         if not os.path.exists(downloads_folder):
-            downloads_folder = os.path.expanduser('~')
+            downloads_folder = os.path.expanduser("~")
 
         default_path = os.path.join(downloads_folder, default_filename)
 
         # Get file path from user
         file_path, _ = QFileDialog.getSaveFileName(
-            self.dlg,
-            "Save Excel File",
-            default_path,
-            "Excel Files (*.xlsx)"
+            self.dlg, "Save Excel File", default_path, "Excel Files (*.xlsx)"
         )
 
         if not file_path:
@@ -1205,6 +1262,7 @@ class BROGrondwaterPlugin:
         try:
             # Fix stdout/stderr for QGIS
             import io
+
             if sys.stdout is None:
                 sys.stdout = io.StringIO()
             if sys.stderr is None:
@@ -1222,58 +1280,78 @@ class BROGrondwaterPlugin:
             workbook = xlsxwriter.Workbook(file_path)
 
             # Add formats
-            header_format = workbook.add_format({'bold': True, 'bg_color': '#D9E1F2'})
-            date_format = workbook.add_format({'num_format': 'yyyy-mm-dd hh:mm:ss'})
+            header_format = workbook.add_format({"bold": True, "bg_color": "#D9E1F2"})
+            date_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm:ss"})
 
             # Collect all series data first
             all_series_data = {}  # For chart: {gmw_id: (dates, values)}
             metadata_list = []
 
             for cache_key, measurement in self._downloaded_measurements.items():
-                series_data = measurement.get('data', {})
-                metadata = series_data.get('metadata', {})
-                name = measurement['name']
-                bro_id = measurement['bro_id']
+                series_data = measurement.get("data", {})
+                metadata = series_data.get("metadata", {})
+                name = measurement["name"]
+                bro_id = measurement["bro_id"]
 
                 # Extract GMW id
-                gmw_match = re.search(r'GMW\d+', str(name) + str(bro_id))
+                gmw_match = re.search(r"GMW\d+", str(name) + str(bro_id))
                 gmw_id = gmw_match.group(0) if gmw_match else bro_id
 
                 # Get metadata
-                measurements_count = len(series_data.get('dates', [])) if series_data else 0
-                metadata_list.append({
-                    'GMW ID': gmw_id,
-                    'Name': name,
-                    'BRO ID': bro_id,
-                    'Tube Nr': metadata.get('tube_nr', measurement['tube_nr']),
-                    'X (RD)': metadata.get('x'),
-                    'Y (RD)': metadata.get('y'),
-                    'Surface Level (m NAP)': metadata.get('ground_level'),
-                    'Filter Top (m NAP)': metadata.get('screen_top'),
-                    'Filter Bottom (m NAP)': metadata.get('screen_bottom'),
-                    'Tube Top (m NAP)': metadata.get('tube_top'),
-                    'Source': metadata.get('source', 'BRO'),
-                    'Unit': metadata.get('unit', 'm NAP'),
-                    'Measurements Count': measurements_count,
-                })
+                measurements_count = (
+                    len(series_data.get("dates", [])) if series_data else 0
+                )
+                metadata_list.append(
+                    {
+                        "GMW ID": gmw_id,
+                        "Name": name,
+                        "BRO ID": bro_id,
+                        "Tube Nr": metadata.get("tube_nr", measurement["tube_nr"]),
+                        "X (RD)": metadata.get("x"),
+                        "Y (RD)": metadata.get("y"),
+                        "Surface Level (m NAP)": metadata.get("ground_level"),
+                        "Filter Top (m NAP)": metadata.get("screen_top"),
+                        "Filter Bottom (m NAP)": metadata.get("screen_bottom"),
+                        "Tube Top (m NAP)": metadata.get("tube_top"),
+                        "Source": metadata.get("source", "BRO"),
+                        "Unit": metadata.get("unit", "m NAP"),
+                        "Measurements Count": measurements_count,
+                    }
+                )
 
                 # Collect series data for chart (use 'name' as series identifier)
-                if series_data and series_data.get('dates') and series_data.get('values'):
+                if (
+                    series_data
+                    and series_data.get("dates")
+                    and series_data.get("values")
+                ):
                     # Use name as identifier, fall back to GMW ID
                     series_name = name if name else gmw_id
                     series_name = series_name[:31]  # Excel sheet name limit
-                    dates = [dt.fromisoformat(d) for d in series_data['dates']]
-                    values = series_data['values']
+                    dates = [dt.fromisoformat(d) for d in series_data["dates"]]
+                    values = series_data["values"]
                     if dates and values:
                         all_series_data[series_name] = (dates, values)
 
             exported_count = len(all_series_data)
 
             # Write Metadata sheet
-            meta_ws = workbook.add_worksheet('Metadata')
-            meta_headers = ['GMW ID', 'Name', 'BRO ID', 'Tube Nr', 'X (RD)', 'Y (RD)',
-                          'Surface Level (m NAP)', 'Filter Top (m NAP)', 'Filter Bottom (m NAP)',
-                          'Tube Top (m NAP)', 'Source', 'Unit', 'Measurements Count']
+            meta_ws = workbook.add_worksheet("Metadata")
+            meta_headers = [
+                "GMW ID",
+                "Name",
+                "BRO ID",
+                "Tube Nr",
+                "X (RD)",
+                "Y (RD)",
+                "Surface Level (m NAP)",
+                "Filter Top (m NAP)",
+                "Filter Bottom (m NAP)",
+                "Tube Top (m NAP)",
+                "Source",
+                "Unit",
+                "Measurements Count",
+            ]
 
             # Track max width for each column (start with header lengths)
             col_widths = [len(header) for header in meta_headers]
@@ -1287,7 +1365,9 @@ class BROGrondwaterPlugin:
                 for col, header in enumerate(meta_headers):
                     value = meta.get(header)
                     # Skip NaN values to avoid #GETAL errors in Dutch Excel
-                    if value is not None and not (isinstance(value, float) and math.isnan(value)):
+                    if value is not None and not (
+                        isinstance(value, float) and math.isnan(value)
+                    ):
                         meta_ws.write(row, col, value)
                         col_widths[col] = max(col_widths[col], len(str(value)))
 
@@ -1311,10 +1391,10 @@ class BROGrondwaterPlugin:
                     series_dicts[gmw_id] = dict(zip(dates_list, values_list))
 
                 # Create chart data worksheet
-                data_ws = workbook.add_worksheet('Chart Data')
+                data_ws = workbook.add_worksheet("Chart Data")
 
                 # Write headers as a row
-                headers = ['datetime'] + gmw_ids
+                headers = ["datetime"] + gmw_ids
                 data_ws.write_row(0, 0, headers, header_format)
 
                 # Build and write data rows efficiently
@@ -1333,54 +1413,63 @@ class BROGrondwaterPlugin:
                 for col, series_id in enumerate(gmw_ids, 1):
                     data_ws.set_column(col, col, max(len(series_id) + 2, 18))
 
-                # Create scatter chart with straight lines (spreiding met rechte lijnen)
-                # This properly handles datetime values on the X-axis
-                chart = workbook.add_chart({'type': 'scatter', 'subtype': 'straight'})
-                chart.show_blanks_as('span')  # Connect points across empty cells
+                # Create chart with show_blanks_as='span' to connect across gaps
+                chart = workbook.add_chart({"type": "line"})
+                chart.show_blanks_as(
+                    "span"
+                )  # This properly connects lines across empty cells
 
                 # Add data series
                 num_rows = len(all_dates)
                 for col, gmw_id in enumerate(gmw_ids, 1):
-                    chart.add_series({
-                        'name': ['Chart Data', 0, col],
-                        'categories': ['Chart Data', 1, 0, num_rows, 0],
-                        'values': ['Chart Data', 1, col, num_rows, col],
-                    })
+                    chart.add_series(
+                        {
+                            "name": ["Chart Data", 0, col],
+                            "categories": ["Chart Data", 1, 0, num_rows, 0],
+                            "values": ["Chart Data", 1, col, num_rows, col],
+                        }
+                    )
 
                 # Style the chart (Dutch labels)
-                chart.set_title({'name': 'Grondwaterstand'})
-                chart.set_x_axis({
-                    'name': 'Datum',
-                    'num_format': 'dd-mm-yyyy',
-                })
-                chart.set_y_axis({
-                    'name': 'Stijghoogte (m NAP)',
-                    'crossing': 'min',  # X-axis crosses at y-minimum, not at y=0
-                })
-                chart.set_legend({'position': 'bottom'})  # Legend below chart
-                chart.set_size({'width': 800, 'height': 480})
+                chart.set_title({"name": "Grondwaterstand"})
+                chart.set_x_axis(
+                    {
+                        "name": "Datum",
+                        "date_axis": True,
+                        "label_position": "low",  # Labels at bottom of plot area
+                        "num_format": "dd-mm-yyyy",
+                    }
+                )
+                chart.set_y_axis(
+                    {
+                        "name": "Stijghoogte (m NAP)",
+                        "crossing": "min",  # X-axis crosses at y-minimum, not at y=0
+                    }
+                )
+                chart.set_legend({"position": "bottom"})  # Legend below chart
+                chart.set_size({"width": 800, "height": 480})
 
                 # Create a dedicated chart sheet
-                chart_ws = workbook.add_chartsheet('Chart')
+                chart_ws = workbook.add_chartsheet("Chart")
                 chart_ws.set_chart(chart)
 
             # Write Credits & Disclaimer sheet
-            credits_ws = workbook.add_worksheet('Credits & Disclaimer')
-            retrieval_date = datetime.now().strftime('%Y-%m-%d %H:%M')
+            credits_ws = workbook.add_worksheet("Credits & Disclaimer")
+            retrieval_date = datetime.now().strftime("%Y-%m-%d %H:%M")
             credits_text = [
                 'Data retrieved with the QGIS plugin "BRO Grondwater"',
-                f'Date of retrieval: {retrieval_date}',
-                '',
-                'Developed by: CWG Ingenieurs b.v. (https://www.cwgi.nl)',
-                'Powered by the Python packages Hydropandas and Brodata',
-                'Data source: BRO (Basisregistratie Ondergrond)',
-                '',
-                'DISCLAIMER',
+                f"Date of retrieval: {retrieval_date}",
+                "",
+                "Developed by: CWG Ingenieurs b.v. (https://www.cwgi.nl)",
+                "Powered by the Python packages Hydropandas and Brodata",
+                "Data source: BRO (Basisregistratie Ondergrond)",
+                "",
+                "DISCLAIMER",
                 'This software is provided "as is", without warranty of any kind, express or implied,',
-                'including but not limited to the warranties of merchantability, fitness for a particular',
-                'purpose and noninfringement. In no event shall the authors or copyright holders be liable',
-                'for any claim, damages or other liability, whether in an action of contract, tort or otherwise,',
-                'arising from, out of or in connection with the software or the use or other dealings in the software.',
+                "including but not limited to the warranties of merchantability, fitness for a particular",
+                "purpose and noninfringement. In no event shall the authors or copyright holders be liable",
+                "for any claim, damages or other liability, whether in an action of contract, tort or otherwise,",
+                "arising from, out of or in connection with the software or the use or other dealings in the software.",
             ]
             for row, text in enumerate(credits_text):
                 credits_ws.write(row, 0, text)
@@ -1390,23 +1479,26 @@ class BROGrondwaterPlugin:
             workbook.close()
 
             self.dlg.progressBar.setValue(100)
-            self.dlg.statusLabel.setText(f"Exported {exported_count} wells to {os.path.basename(file_path)}")
+            self.dlg.statusLabel.setText(
+                f"Exported {exported_count} wells to {os.path.basename(file_path)}"
+            )
             QMessageBox.information(
                 self.dlg,
                 "Success",
                 f"Data successfully exported to:\n{file_path}\n\n"
-                f"Exported measurements for {exported_count} wells."
+                f"Exported measurements for {exported_count} wells.",
             )
 
             # Open the Excel file
             try:
                 import subprocess
-                if sys.platform == 'win32':
+
+                if sys.platform == "win32":
                     os.startfile(file_path)
-                elif sys.platform == 'darwin':  # macOS
-                    subprocess.run(['open', file_path])
+                elif sys.platform == "darwin":  # macOS
+                    subprocess.run(["open", file_path])
                 else:  # Linux
-                    subprocess.run(['xdg-open', file_path])
+                    subprocess.run(["xdg-open", file_path])
             except Exception as open_error:
                 # Don't fail if we can't open the file
                 print(f"Could not open file: {open_error}")
@@ -1416,13 +1508,11 @@ class BROGrondwaterPlugin:
                 self.dlg,
                 "Import Error",
                 "xlsxwriter is required for Excel export. Please install it using:\n"
-                "pip install xlsxwriter"
+                "pip install xlsxwriter",
             )
         except Exception as e:
             QMessageBox.critical(
-                self.dlg,
-                "Export Error",
-                f"Error exporting to Excel:\n{str(e)}"
+                self.dlg, "Export Error", f"Error exporting to Excel:\n{str(e)}"
             )
         finally:
             self._end_operation()
