@@ -6,19 +6,14 @@ A QGIS plugin for retrieving and analyzing BRO groundwater monitoring data
 
 def _install_dependencies():
     """Auto-install required packages via pip if not already present."""
-    import subprocess
-    import sys
-    packages = ['hydropandas', 'brodata', 'xlsxwriter']
+    packages = ['hydropandas', 'brodata', 'xlsxwriter', 'pyqtgraph']
     for package in packages:
         try:
             __import__(package.replace('-', '_'))
         except ImportError:
             try:
-                subprocess.check_call(
-                    [sys.executable, '-m', 'pip', 'install', '--quiet', package],
-                    stdout=subprocess.DEVNULL,
-                    stderr=subprocess.DEVNULL
-                )
+                from pip._internal.cli.main import main as pip_main
+                pip_main(['install', '--quiet', package])
             except Exception:
                 pass
 

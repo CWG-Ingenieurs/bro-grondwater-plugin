@@ -840,11 +840,13 @@ class BROGrondwaterPlugin:
         if self.wells_layer is None:
             return
 
+        # Save the current filter so we can always restore it
+        saved_filter = self.wells_layer.subsetString()
+
         try:
-            import pyqtgraph as pg
             import numpy as np
 
-            # Get screen_top values from the layer (unfiltered)
+            # Temporarily remove filter to get all values
             self.wells_layer.setSubsetString('')
             screen_top_values = []
             for feature in self.wells_layer.getFeatures():
@@ -852,44 +854,8 @@ class BROGrondwaterPlugin:
                 if val is not None:
                     screen_top_values.append(val)
 
-            # Restore filter if set
-            if filter_min is not None and filter_max is not None and filter_max > filter_min:
-                self.wells_layer.setSubsetString(
-                    f'"screen_top" >= {filter_min} AND "screen_top" <= {filter_max}'
-                )
-
             if not screen_top_values:
                 return
-
-            # Clear existing histogram widget
-            if hasattr(self, 'histogram_canvas') and self.histogram_canvas is not None:
-                self.histogram_canvas.setParent(None)
-                self.histogram_canvas.deleteLater()
-
-            # Compute histogram bins
-            counts, bin_edges = np.histogram(screen_top_values, bins=20)
-            bar_width = bin_edges[1] - bin_edges[0]
-            x = bin_edges[:-1]
-
-            # Create PyQtGraph plot widget
-            plot_widget = pg.PlotWidget()
-            plot_widget.setBackground('#f0f0f0')
-            plot_widget.setMaximumHeight(120)
-            plot_widget.setLabel('bottom', 'Top Filter Depth (m NAP)', size='7pt')
-            plot_widget.setLabel('left', 'Count', size='7pt')
-
-            # Blue bars for all data
-            plot_widget.addItem(pg.BarGraphItem(
-                x=x, height=counts, width=bar_width * 0.9, brush='#0066cc'
-            ))
-
-            # Green overlay for filtered range
-            if filter_min is not None and filter_max is not None:
-                mask = (x >= filter_min) & ((x + bar_width) <= filter_max)
-                if mask.any():
-                    plot_widget.addItem(pg.BarGraphItem(
-                        x=x[mask], height=counts[mask], width=bar_width * 0.9, brush='#00cc66'
-                    ))
 
             # Update spin box ranges
             data_min = min(screen_top_values)
@@ -901,14 +867,57 @@ class BROGrondwaterPlugin:
 
             if filter_min is None:
                 self.dlg.spinMinDepth.setValue(data_min)
-                self.dlg.spinMaxDepth.setValue(data_max)
+                self.dlg.spinMaxDepth.setValue(data_max + 0.1)
 
-            # Embed in dialog
-            self.histogram_canvas = plot_widget
-            self.dlg.frameHistogram.layout().addWidget(self.histogram_canvas)
+            # Try to draw histogram — non-critical, filter works regardless
+            try:
+                import pyqtgraph as pg
+
+                # Clear existing histogram widget
+                if hasattr(self, 'histogram_canvas') and self.histogram_canvas is not None:
+                    self.histogram_canvas.setParent(None)
+                    self.histogram_canvas.deleteLater()
+
+                counts, bin_edges = np.histogram(screen_top_values, bins=20)
+                bar_width = bin_edges[1] - bin_edges[0]
+                x = bin_edges[:-1]
+
+                plot_widget = pg.PlotWidget()
+                plot_widget.setBackground('#f0f0f0')
+                plot_widget.hideAxis('left')
+                bottom_axis = plot_widget.getAxis('bottom')
+                bottom_axis.setStyle(tickLength=3, tickTextOffset=1)
+                from qgis.PyQt.QtGui import QFont
+                bottom_axis.setTickFont(QFont('Arial', 6))
+                plot_widget.getPlotItem().setContentsMargins(0, 0, 0, 0)
+
+                plot_widget.addItem(pg.BarGraphItem(
+                    x=x, height=counts, width=bar_width * 0.9, brush='#0066cc'
+                ))
+
+                if filter_min is not None and filter_max is not None:
+                    mask = (x >= filter_min) & ((x + bar_width) <= filter_max)
+                    if mask.any():
+                        plot_widget.addItem(pg.BarGraphItem(
+                            x=x[mask], height=counts[mask], width=bar_width * 0.9, brush='#00cc66'
+                        ))
+
+                self.histogram_canvas = plot_widget
+                self.dlg.frameHistogram.layout().addWidget(self.histogram_canvas)
+
+            except Exception as e:
+                print(f"Histogram display unavailable: {e}")
 
         except Exception as e:
-            print(f"Error creating histogram: {e}")
+            print(f"Error reading screen_top values: {e}")
+        finally:
+            # Always restore the filter
+            if filter_min is not None and filter_max is not None and filter_max > filter_min:
+                self.wells_layer.setSubsetString(
+                    f'"screen_top" >= {filter_min} AND "screen_top" <= {filter_max}'
+                )
+            else:
+                self.wells_layer.setSubsetString(saved_filter)
 
     def _get_measurements_for_well(self, bro_id, tube_nr, name=None):
         """Fetch measurements for a single well on-demand."""
@@ -1023,9 +1032,21 @@ class BROGrondwaterPlugin:
 
         self._start_operation()
         try:
-            import pyqtgraph as pg
+            try:
+                import pyqtgraph as pg
+            except ImportError:
+                QMessageBox.critical(
+                    self.dlg,
+                    "Missing Dependency",
+                    "pyqtgraph is not yet installed.\n\n"
+                    "Please restart QGIS to trigger automatic installation, "
+                    "or install it manually via OSGeo4W Shell:\n"
+                    "  pip install pyqtgraph"
+                )
+                return
             from datetime import datetime as dt
-            from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton
+            from qgis.PyQt.QtWidgets import QDialog, QVBoxLayout, QHBoxLayout, QPushButton, QToolButton, QButtonGroup
+            from qgis.PyQt.QtCore import QSize
 
             # Create plot dialog
             plot_dialog = QDialog(self.dlg)
@@ -1080,14 +1101,58 @@ class BROGrondwaterPlugin:
                 self.dlg.statusLabel.setText("Ready")
                 return
 
-            layout.addWidget(plot_widget)
+            # Toolbar
+            toolbar = QHBoxLayout()
+            toolbar.setSpacing(4)
 
-            btn_layout = QHBoxLayout()
+            vb = plot_widget.getViewBox()
+
+            btn_pan = QToolButton()
+            btn_pan.setText("Pan")
+            btn_pan.setToolTip("Pan mode: drag to scroll")
+            btn_pan.setCheckable(True)
+            btn_pan.setChecked(True)
+
+            btn_zoom = QToolButton()
+            btn_zoom.setText("Zoom")
+            btn_zoom.setToolTip("Zoom mode: drag to draw zoom box")
+            btn_zoom.setCheckable(True)
+
+            mode_group = QButtonGroup()
+            mode_group.addButton(btn_pan)
+            mode_group.addButton(btn_zoom)
+            mode_group.setExclusive(True)
+
+            btn_pan.clicked.connect(lambda: vb.setMouseMode(vb.PanMode))
+            btn_zoom.clicked.connect(lambda: vb.setMouseMode(vb.RectMode))
+
+            btn_reset = QPushButton("Reset view")
+            btn_reset.setToolTip("Zoom to fit all data")
+            btn_reset.clicked.connect(lambda: plot_widget.autoRange())
+
+            btn_zoom_in = QPushButton("＋")
+            btn_zoom_in.setToolTip("Zoom in")
+            btn_zoom_in.setFixedWidth(32)
+            btn_zoom_in.clicked.connect(lambda: vb.scaleBy((0.7, 0.7)))
+
+            btn_zoom_out = QPushButton("－")
+            btn_zoom_out.setToolTip("Zoom out")
+            btn_zoom_out.setFixedWidth(32)
+            btn_zoom_out.clicked.connect(lambda: vb.scaleBy((1.4, 1.4)))
+
+            toolbar.addWidget(btn_pan)
+            toolbar.addWidget(btn_zoom)
+            toolbar.addWidget(btn_zoom_in)
+            toolbar.addWidget(btn_zoom_out)
+            toolbar.addWidget(btn_reset)
+            toolbar.addStretch()
+
             btn_save = QPushButton("Save as PNG")
             btn_save.clicked.connect(lambda: self._save_plot(plot_widget))
-            btn_layout.addStretch()
-            btn_layout.addWidget(btn_save)
-            layout.addLayout(btn_layout)
+            toolbar.addWidget(btn_save)
+
+            layout.addLayout(toolbar)
+            layout.addWidget(plot_widget)
 
             plot_dialog.setLayout(layout)
 
