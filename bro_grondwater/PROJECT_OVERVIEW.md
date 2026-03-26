@@ -1,8 +1,6 @@
 # BRO Grondwater Plugin - Project Overview
 
 **Developer**: CWG Ingenieurs b.v.
-**Version**: 0.1
-**Date**: December 2024
 **License**: MIT
 
 ## Executive Summary
