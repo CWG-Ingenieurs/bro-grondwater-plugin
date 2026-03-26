@@ -205,25 +205,6 @@ git push -u origin main
 ### Disclaimer
 Software provided "as is" without warranty. Full disclaimer in LICENSE file and export files.
 
-## Future Development (Roadmap)
-
-### Version 1.1 (Q1 2025)
-- Additional export formats (CSV, GeoJSON)
-- Custom date range selection
-- Quality flag filtering
-- Save/load filter presets
-
-### Version 1.2 (Q2 2025)
-- Integration with soil/lithology data
-- Advanced plotting (statistics, comparisons)
-- Batch processing
-- Custom report templates
-
-### Version 2.0 (Q3 2025)
-- UI redesign
-- Database connection support
-- Custom analysis tools
-- Public API
 
 ## Support & Maintenance
 
@@ -285,35 +266,9 @@ BRO data subject to BRO terms of use
 ### Third-Party Licenses
 - Hydropandas: MIT License
 - Pandas: BSD License
-- Matplotlib: PSF License
 - xlsxwriter: BSD License
 
-## Success Metrics
 
-### Adoption Goals
-- 50+ users in first 3 months
-- 10+ organizations using
-- 5+ feature requests/contributions
-- Public release within 6 months
-
-### User Satisfaction
-- < 5% critical bugs
-- > 80% positive feedback
-- Active community engagement
-- Regular feature updates
-
-## Deployment Checklist
-
-- [x] Core functionality implemented
-- [x] UI designed and functional
-- [x] Documentation complete
-- [x] Installation tested
-- [x] GitHub repository structure ready
-- [ ] Private repository created
-- [ ] Internal testing (1-2 weeks)
-- [ ] Bug fixes and refinements
-- [ ] Public release decision
-- [ ] Optional: QGIS Plugin Repository submission
 
 ## Contact & Resources
 
@@ -327,8 +282,3 @@ Hydrogeological engineering and consulting
 - [BRO Loket](https://www.broloket.nl/)
 - [BRO Documentation](https://basisregistratieondergrond.nl/)
 
----
-
-**Document Version**: 1.0  
-**Last Updated**: December 2024  
-**Status**: Ready for Deployment
