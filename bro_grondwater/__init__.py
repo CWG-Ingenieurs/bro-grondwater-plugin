@@ -3,6 +3,15 @@ BRO Grondwater Plugin
 A QGIS plugin for retrieving and analyzing BRO groundwater monitoring data
 """
 
+import io
+import sys
+
+# Fix stdout/stderr for QGIS before any imports that may emit warnings
+if sys.stdout is None:
+    sys.stdout = io.StringIO()
+if sys.stderr is None:
+    sys.stderr = io.StringIO()
+
 
 def _install_dependencies():
     """Auto-install required packages via pip if not already present."""
