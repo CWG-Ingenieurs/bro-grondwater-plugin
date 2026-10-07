@@ -2,8 +2,8 @@
 
 A QGIS plugin for retrieving and analyzing BRO (Basisregistratie Ondergrond) groundwater monitoring well data using Hydropandas.
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue)
-![QGIS](https://img.shields.io/badge/QGIS-%3E%3D3.0-green)
+![Version](https://img.shields.io/badge/version-0.2.3-blue)
+![QGIS](https://img.shields.io/badge/QGIS-4.x-green)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
 ## Features
@@ -19,28 +19,53 @@ A QGIS plugin for retrieving and analyzing BRO (Basisregistratie Ondergrond) gro
 
 ### Prerequisites
 
-- QGIS 3.0 or higher
-- Python 3.7 or higher (usually comes with QGIS)
+- QGIS 4.x (the plugin requires QGIS 4.0 or higher; QGIS 3 is not supported)
+- The Python environment that comes with QGIS
+- An internet connection: data is retrieved from the BRO and PDOK
+
+### Python dependencies
+
+The plugin installs these packages into the QGIS Python environment automatically
+when it loads. Packages that are already installed but older than the minimum
+version are upgraded:
+
+| Package | Minimum version | Used for |
+|---|---|---|
+| hydropandas | | Retrieving BRO wells and measurements |
+| brodata | | Fast BRO retrieval (hydropandas `brodata` engine) |
+| pandas | 1.3.0 | Data handling |
+| xlsxwriter | 3.0.0 | Excel export |
+| pyqtgraph | | Plots and the screen-top histogram |
+| requests | 2.33.0 | HTTP requests to the BRO and PDOK |
+| urllib3 | 2.8.0 | Used by requests |
+| idna | 3.15 | Used by requests |
+| certifi | 2024.7.4 | Used by requests |
+| tqdm | 4.66.3 | Progress reporting in hydropandas |
+
+The minimum versions of requests, urllib3, idna, certifi and tqdm avoid versions
+with known vulnerabilities. Compiled packages that come with QGIS (such as numpy,
+pillow and lxml) are not upgraded by the plugin; update those by updating QGIS.
+The same list is in [requirements.txt](requirements.txt).
 
 ### Install Plugin
 
 1. Download the plugin repository
 2. Copy the `bro_grondwater` folder to your QGIS plugins directory:
-   - **Windows**: `C:\Users\<YourUsername>\AppData\Roaming\QGIS\QGIS3\profiles\default\python\plugins`
-   - **macOS**: `~/Library/Application Support/QGIS/QGIS3/profiles/default/python/plugins`
-   - **Linux**: `~/.local/share/QGIS/QGIS3/profiles/default/python/plugins`
+   - **Windows**: `C:\Users\<YourUsername>\AppData\Roaming\QGIS\QGIS4\profiles\default\python\plugins`
+   - **macOS**: `~/Library/Application Support/QGIS/QGIS4/profiles/default/python/plugins`
+   - **Linux**: `~/.local/share/QGIS/QGIS4/profiles/default/python/plugins`
+3. Restart QGIS
+4. Enable the plugin: `Plugins` → `Manage and Install Plugins` → `Installed` → Check `BRO Grondwater`.
+   The Python dependencies are installed automatically the first time the plugin
+   loads; restart QGIS once more afterwards.
 
-3. Install Python dependencies in QGIS Python environment:
+If the automatic installation fails (for example behind a proxy), install the
+dependencies manually in the QGIS Python environment (OSGeo4W Shell on Windows),
+from the plugin folder:
 
 ```bash
-# Open OSGeo4W Shell (Windows) or QGIS Python Console
-
-# Install all dependencies
-pip install hydropandas pandas xlsxwriter matplotlib
+pip install -r requirements.txt
 ```
-
-4. Restart QGIS
-5. Enable the plugin: `Plugins` → `Manage and Install Plugins` → `Installed` → Check `BRO Grondwater Plugin`
 
 ## Usage
 
@@ -109,9 +134,10 @@ Example style features:
 ## Troubleshooting
 
 ### "Hydropandas is not installed"
-Install hydropandas:
+Restart QGIS so the plugin can install its dependencies. If that doesn't help,
+install them manually (see [Python dependencies](#python-dependencies)):
 ```bash
-pip install hydropandas
+pip install -r requirements.txt
 ```
 
 ### "No monitoring wells found"
@@ -124,9 +150,10 @@ pip install hydropandas
 - Ensure internet connection is working
 
 ### Import Errors
-Install missing packages in QGIS Python environment:
+Install missing packages in the QGIS Python environment (OSGeo4W Shell on Windows),
+from the plugin folder:
 ```bash
-pip install hydropandas pandas xlsxwriter matplotlib
+pip install -r requirements.txt
 ```
 
 ## Credits
