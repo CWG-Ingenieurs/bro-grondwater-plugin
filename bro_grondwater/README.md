@@ -10,7 +10,7 @@ A QGIS plugin for retrieving and analyzing BRO (Basisregistratie Ondergrond) gro
 
 - **Retrieve Wells**: Automatically retrieve BRO groundwater monitoring well locations for the current map extent
 - **Fast Data Access**: Uses Hydropandas library for efficient BRO data retrieval
-- **Depth Filtering**: Filter wells based on filter depth (top_filter)
+- **Depth Filtering**: Filter wells on the top of the filter screen (bovenkant filter, `screen_top`), in m NAP
 - **Data Visualization**: Plot groundwater measurements for selected wells
 - **Excel Export**: Export well metadata and measurements to Excel format
 - **QMD Styling**: Automatic styling of well locations on the map
@@ -52,13 +52,15 @@ pip install hydropandas pandas xlsxwriter matplotlib
 4. The plugin will retrieve all BRO groundwater monitoring wells within the visible extent
 5. Wells will be added as a new layer to your map
 
-### 2. Filter by Depth
+### 2. Filter by Top of Screen
 
-1. After retrieving wells, set your desired depth range:
-   - **Min Depth**: Minimum filter depth in meters
-   - **Max Depth**: Maximum filter depth in meters
-2. Click **"Apply Filter"**
-3. The layer will show only wells matching your depth criteria
+1. After retrieving wells, set the range for the top of the filter screen
+   (bovenkant filter, `screen_top`). The values are levels in m NAP, not depths
+   below ground level; the bottom of the screen is not used:
+   - **Min top**: lowest screen top to show (m NAP)
+   - **Max top**: highest screen top to show (m NAP)
+2. Click **"Apply"**
+3. The layer will show only tubes whose screen top lies in this range
 
 ### 3. Analyze Selected Wells
 

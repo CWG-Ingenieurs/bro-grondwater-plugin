@@ -34,6 +34,46 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 from .bro_grondwater_dialog import BROGrondwaterPluginPanel
 
+# Why a measurement download failed: (short label, explanation for the user)
+DOWNLOAD_FAILURE_REASONS = {
+    "no_data": (
+        "without measurements",
+        "These tubes have no groundwater level measurements in the BRO. Check "
+        "'Only locations with measurements' before retrieving wells to hide them.",
+    ),
+    "no_gmw_id": (
+        "without BRO ID",
+        "No BRO well ID (GMW...) was found for these wells, so they can't be "
+        "looked up.",
+    ),
+    "rate_limited": (
+        "refused by the BRO (too many requests)",
+        "The BRO server was busy. Download these wells again later.",
+    ),
+    "network": (
+        "with a connection error",
+        "The BRO server could not be reached. Check your internet connection "
+        "and download these wells again.",
+    ),
+    "error": (
+        "with an error",
+        "See 'Show Details' or the BRO Grondwater tab in the QGIS log messages.",
+    ),
+}
+
+
+def _classify_download_error(exception):
+    """Return the DOWNLOAD_FAILURE_REASONS key for a download exception."""
+    import requests
+
+    error_str = str(exception)
+    if "429" in error_str or "Too Many Requests" in error_str:
+        return "rate_limited"
+    if isinstance(exception, (requests.ConnectionError, requests.Timeout)):
+        return "network"
+    return "error"
+
+
 PDOK_GM_URL = "https://api.pdok.nl/bzk/bro-gminsamenhang-karakteristieken/ogc/v1"
 RD_CRS_URI = "http://www.opengis.net/def/crs/EPSG/0/28992"
 
@@ -639,8 +679,14 @@ class BROGrondwaterPlugin:
             self.iface.mapCanvas().refresh()
 
             filtered_count = self.wells_layer.featureCount()
+            range_text = (
+                f"between {min_depth:g} and {max_depth:g}"
+                if max_depth > min_depth
+                else f"at or above {min_depth:g}"
+            )
             self.dlg.statusLabel.setText(
-                f"Filter applied: {filtered_count} wells visible"
+                f"Filter applied: {filtered_count} wells visible "
+                f"(top of screen {range_text} m NAP)"
             )
 
             # Zoom to filtered features if any
@@ -722,6 +768,7 @@ class BROGrondwaterPlugin:
         self._expected_results = len(features_to_download)
         self._downloaded_count = 0
         self._failed_count = 0
+        self._failures = []
         self._futures = []
 
         # Start ThreadPoolExecutor
@@ -769,6 +816,7 @@ class BROGrondwaterPlugin:
                 "success": False,
                 "cache_key": cache_key,
                 "error": "No GMW ID found",
+                "reason": "no_gmw_id",
                 "name": name,
                 "bro_id": bro_id,
                 "tube_nr": tube_nr,
@@ -820,6 +868,7 @@ class BROGrondwaterPlugin:
                         "success": False,
                         "cache_key": cache_key,
                         "error": "No data returned",
+                        "reason": "no_data",
                         "name": name,
                         "bro_id": bro_id,
                         "tube_nr": tube_nr,
@@ -835,6 +884,7 @@ class BROGrondwaterPlugin:
                     "success": False,
                     "cache_key": cache_key,
                     "error": error_str,
+                    "reason": _classify_download_error(e),
                     "name": name,
                     "bro_id": bro_id,
                     "tube_nr": tube_nr,
@@ -869,10 +919,14 @@ class BROGrondwaterPlugin:
                         "BRO Grondwater",
                         Qgis.Warning,
                     )
+                    self._failures.append(result)
                     self._failed_count += 1
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error processing result: {e}", "BRO Grondwater", Qgis.Warning
+                )
+                self._failures.append(
+                    {"name": "unknown", "error": str(e), "reason": "error"}
                 )
                 self._failed_count += 1
 
@@ -907,7 +961,17 @@ class BROGrondwaterPlugin:
         self.dlg.progressBar.setValue(100)
         status_msg = f"Downloaded {downloaded_count} wells"
         if failed_count > 0:
-            status_msg += f" ({failed_count} failed)"
+            reason_counts = {}
+            for failure in self._failures:
+                reason = failure.get("reason", "error")
+                reason_counts[reason] = reason_counts.get(reason, 0) + 1
+            status_msg += (
+                f", {failed_count} not downloaded: "
+                + ", ".join(
+                    f"{count} {DOWNLOAD_FAILURE_REASONS[reason][0]}"
+                    for reason, count in reason_counts.items()
+                )
+            )
         self.dlg.labelDownloadStatus.setText(status_msg)
         self.dlg.labelDownloadStatus.setStyleSheet(
             "color: #006600; font-style: normal;"
@@ -915,6 +979,41 @@ class BROGrondwaterPlugin:
         self.dlg.statusLabel.setText(status_msg)
 
         self._end_operation()
+
+        if failed_count > 0:
+            self._show_download_failures()
+
+    def _show_download_failures(self):
+        """Explain per reason which wells could not be downloaded."""
+        by_reason = {}
+        for failure in self._failures:
+            by_reason.setdefault(failure.get("reason", "error"), []).append(failure)
+
+        sections = []
+        for reason, failures in by_reason.items():
+            label, explanation = DOWNLOAD_FAILURE_REASONS[reason]
+            names = [
+                str(f.get("name") or f.get("bro_id") or "unknown") for f in failures
+            ]
+            shown = ", ".join(names[:10])
+            if len(names) > 10:
+                shown += f" and {len(names) - 10} more"
+            sections.append(f"{len(failures)} {label}\n{explanation}\n{shown}")
+
+        msg = QMessageBox(self.dlg)
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Not all wells downloaded")
+        msg.setText(
+            f"{len(self._failures)} of {self._expected_results} wells were not "
+            "downloaded:\n\n" + "\n\n".join(sections)
+        )
+        msg.setDetailedText(
+            "\n".join(
+                f"{f.get('name', 'unknown')}: {f.get('error', 'Unknown')}"
+                for f in self._failures
+            )
+        )
+        msg.exec()
 
     def _cancel_download(self):
         """Cancel the download process."""

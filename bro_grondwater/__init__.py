@@ -13,19 +13,58 @@ if sys.stderr is None:
     sys.stderr = io.StringIO()
 
 
-def _install_dependencies():
-    """Auto-install required packages via pip if not already present."""
-    packages = ["hydropandas", "brodata", "xlsxwriter", "pyqtgraph"]
-    for package in packages:
-        try:
-            __import__(package.replace("-", "_"))
-        except ImportError:
-            try:
-                from pip._internal.cli.main import main as pip_main
+# Packages installed into the QGIS Python environment, with minimum versions.
+# The minimums of the pure-Python HTTP stack (requests, urllib3, idna, certifi)
+# and tqdm avoid versions with known vulnerabilities (CVEs, issue #25). Compiled
+# packages that ship with QGIS (numpy, pillow, lxml, ...) are deliberately not
+# upgraded from here: replacing them with pip can break QGIS itself. Keep in sync
+# with requirements.txt and pip_dependencies in metadata.txt.
+DEPENDENCIES = {
+    "hydropandas": None,
+    "brodata": None,
+    "pandas": "1.3.0",
+    "xlsxwriter": "3.0.0",
+    "pyqtgraph": None,
+    "requests": "2.33.0",
+    "urllib3": "2.8.0",
+    "idna": "3.15",
+    "certifi": "2024.7.4",
+    "tqdm": "4.66.3",
+}
 
-                pip_main(["install", "--quiet", package])
-            except Exception:
-                pass
+
+def _needs_install(package, minimum):
+    """Return True if package is missing or older than its minimum version."""
+    from importlib.metadata import PackageNotFoundError, version
+
+    try:
+        installed = version(package)
+    except PackageNotFoundError:
+        return True
+    if minimum is None:
+        return False
+    try:
+        from packaging.version import Version
+    except ImportError:
+        from pip._vendor.packaging.version import Version
+    try:
+        return Version(installed) < Version(minimum)
+    except Exception:
+        return False
+
+
+def _install_dependencies():
+    """Install missing packages and upgrade ones below their minimum version."""
+    for package, minimum in DEPENDENCIES.items():
+        try:
+            if not _needs_install(package, minimum):
+                continue
+            from pip._internal.cli.main import main as pip_main
+
+            requirement = f"{package}>={minimum}" if minimum else package
+            pip_main(["install", "--quiet", requirement])
+        except Exception:
+            pass
 
 
 _install_dependencies()
