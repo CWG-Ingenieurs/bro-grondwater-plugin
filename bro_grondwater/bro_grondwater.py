@@ -387,9 +387,31 @@ class BROGrondwaterPlugin:
 
             self.dlg.progressBar.setValue(30)
 
+            # Only locations with measurements (issue #17): hydropandas/brodata
+            # can only tell whether a location has measurements by actually
+            # downloading its measurement dossier (GLD), which is exactly what
+            # only_metadata=True skips. So filtering on "has measurements"
+            # means giving up the fast metadata-only retrieval for this call.
+            # - engine="brodata" already filters to locations with GLD data as
+            #   a side effect of only_metadata=False (see brodata.gmw.get_data_in_extent,
+            #   which intersects wells against its own GLD download); keep_all_obs
+            #   is not consulted at all on that code path.
+            # - engine="hydropandas" (fallback) only has real measurement data to
+            #   check emptiness against when only_metadata=False, so keep_all_obs=False
+            #   is also needed there to actually drop the empty ones.
+            only_with_measurements = self.dlg.checkBoxOnlyWithMeasurements.isChecked()
+            only_metadata = not only_with_measurements
+            if only_with_measurements:
+                self.dlg.statusLabel.setText(
+                    "Retrieving well locations from BRO (checking for "
+                    "measurements, this may take longer)..."
+                )
+
             # Retrieve observations using hydropandas
             # Use read_bro for extent-based queries (returns ObsCollection)
-            # Use only_metadata=True for fast initial retrieval (measurements loaded on-demand)
+            # only_metadata=True by default for fast initial retrieval (measurements
+            # loaded on-demand); only_metadata=False when the "only locations with
+            # measurements" checkbox is on (see above).
             # Try brodata engine first (faster), fall back to default if not available
             engine_used = None
             try:
@@ -398,14 +420,19 @@ class BROGrondwaterPlugin:
                         extent=extent_tuple,
                         tmin=None,
                         tmax=None,
-                        only_metadata=True,
+                        only_metadata=only_metadata,
+                        keep_all_obs=not only_with_measurements,
                         engine="brodata",
                     )
                     engine_used = "brodata"
                 except TypeError:
                     # brodata engine not available, use default
                     obs_collection = hpd.read_bro(
-                        extent=extent_tuple, tmin=None, tmax=None, only_metadata=True
+                        extent=extent_tuple,
+                        tmin=None,
+                        tmax=None,
+                        only_metadata=only_metadata,
+                        keep_all_obs=not only_with_measurements,
                     )
                     engine_used = "default"
             except Exception as e:
@@ -515,8 +542,9 @@ class BROGrondwaterPlugin:
                 print(f"Style file not found: {qml_path}")
 
             self.dlg.progressBar.setValue(100)
+            filter_suffix = " with measurements" if only_with_measurements else ""
             self.dlg.statusLabel.setText(
-                f"Retrieved {len(features)} wells (engine: {engine_used})"
+                f"Retrieved {len(features)} wells{filter_suffix} (engine: {engine_used})"
             )
 
             # Store observation collection for later use

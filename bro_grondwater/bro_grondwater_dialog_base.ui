@@ -72,6 +72,16 @@
        <number>4</number>
       </property>
       <item>
+       <widget class="QCheckBox" name="checkBoxOnlyWithMeasurements">
+        <property name="toolTip">
+         <string>Filters out locations that have never had any groundwater level measurements. This requires downloading each location's measurement dossier during retrieval, which is slower than the default.</string>
+        </property>
+        <property name="text">
+         <string>Only locations with measurements (slower)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnRetrieveWells">
         <property name="text">
          <string>Retrieve Wells from Current Extent</string>
