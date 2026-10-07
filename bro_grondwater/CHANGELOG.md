@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- "Only locations with measurements" checkbox next to "Retrieve Wells from Current Extent". When checked, monitoring tubes without a groundwater level dossier (GLD) with measurements are filtered out. Which tubes have measurements is looked up in the PDOK "GM in samenhang - karakteristieken" index, so retrieval stays metadata-only and no measurements are downloaded (#17).
+
 ### Planned
 - Additional filter options (multiple depth ranges, quality flags)
 - Custom map styling options
