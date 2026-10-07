@@ -1,0 +1,3 @@
+# Formatter settings for this repository (not shipped in the plugin ZIP).
+# 79 = flake8's default line length, which plugins.qgis.org checks with.
+line-length = 79

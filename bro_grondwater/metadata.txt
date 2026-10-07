@@ -4,7 +4,7 @@ qgisMinimumVersion=4.0
 qgisMaximumVersion=4.99
 description=Retrieve and analyze BRO groundwater monitoring well data using Hydropandas
 pip_dependencies=hydropandas,brodata,pandas>=1.3.0,xlsxwriter>=3.0.0,pyqtgraph,requests>=2.33.0,urllib3>=2.8.0,idna>=3.15,certifi>=2024.7.4,tqdm>=4.66.3
-version=0.2.4
+version=0.2.5
 author=CWG Ingenieurs b.v.
 email=info@cwgi.nl
 
@@ -19,7 +19,10 @@ icon=icon.png
 experimental=True
 deprecated=False
 
-changelog=0.2.4
+changelog=0.2.5
+    - Fix QGIS 4 / Qt6 enum warnings: use Qgis.MessageLevel.Warning
+    - Code passes flake8 with default settings; no .flake8 config file in the plugin anymore
+    0.2.4
     - Resolve the Bandit and flake8 findings of the plugins.qgis.org security scan (#32)
     - Open the exported Excel file via Qt instead of os.startfile/subprocess
     - Log failed dependency installs to the QGIS message log
