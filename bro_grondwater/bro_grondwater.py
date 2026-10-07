@@ -1154,7 +1154,7 @@ class BROGrondwaterPlugin:
                     "  pip install pyqtgraph",
                 )
                 return
-            from datetime import datetime as dt
+            from datetime import datetime as dt, timezone
             from qgis.PyQt.QtWidgets import (
                 QDialog,
                 QVBoxLayout,
@@ -1171,8 +1171,10 @@ class BROGrondwaterPlugin:
             plot_dialog.resize(800, 500)
             layout = QVBoxLayout()
 
-            # Time series plot with date axis
-            date_axis = pg.DateAxisItem(orientation="bottom")
+            # Time series plot with date axis. The measurement dates are naive and
+            # are converted to timestamps as if they were UTC (see below), so the
+            # axis must not shift them to local time either.
+            date_axis = pg.DateAxisItem(orientation="bottom", utcOffset=0)
             plot_widget = pg.PlotWidget(axisItems={"bottom": date_axis})
             plot_widget.setBackground("w")
             plot_widget.showGrid(x=True, y=True, alpha=0.3)
@@ -1212,8 +1214,12 @@ class BROGrondwaterPlugin:
                     gmw_match = re.search(r"GMW\d+", str(name) + str(bro_id))
                     label = gmw_match.group(0) if gmw_match else (name or bro_id)
 
+                    # Interpret naive dates as UTC: naive datetime.timestamp() asks
+                    # the OS for the local time, which fails on Windows for dates
+                    # before 1970 ("[Errno 22] Invalid argument", issue #26).
                     timestamps = [
-                        dt.fromisoformat(d).timestamp() for d in series_data["dates"]
+                        dt.fromisoformat(d).replace(tzinfo=timezone.utc).timestamp()
+                        for d in series_data["dates"]
                     ]
                     values = series_data["values"]
 
