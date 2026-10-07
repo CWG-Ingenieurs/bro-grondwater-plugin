@@ -15,7 +15,9 @@ def test_plugin():
     # Test 1: Check if plugin is loaded
     print("Test 1: Plugin Loading")
     try:
-        plugin = iface.plugins.get("bro_grondwater")
+        from qgis.utils import plugins
+
+        plugin = plugins.get("bro_grondwater")
         if plugin:
             print("✓ Plugin loaded successfully")
         else:
@@ -49,9 +51,8 @@ def test_plugin():
     try:
         import hydropandas as hpd
 
-        print(
-            f"✓ Hydropandas version: {hpd.__version__ if hasattr(hpd, '__version__') else 'Unknown'}"
-        )
+        version = getattr(hpd, "__version__", "Unknown")
+        print(f"✓ Hydropandas version: {version}")
         print(
             "  ℹ Plugin will use brodata engine if available, otherwise standard method"
         )
@@ -63,8 +64,10 @@ def test_plugin():
     # Test 4: Check QGIS API access
     print("Test 4: QGIS API")
     try:
-        from qgis.core import QgsVectorLayer, QgsProject
-        from qgis.PyQt.QtWidgets import QMessageBox
+        import importlib
+
+        importlib.import_module("qgis.core")
+        importlib.import_module("qgis.PyQt.QtWidgets")
 
         print("✓ QGIS core modules accessible")
         print("✓ Qt widgets accessible")

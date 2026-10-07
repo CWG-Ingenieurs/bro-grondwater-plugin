@@ -87,7 +87,8 @@ def classFactory(iface):
             None,
             "BRO Grondwater Plugin",
             f"Missing dependency: {e}\n\n"
-            "Please restart QGIS. If the problem persists, install manually via OSGeo4W Shell:\n"
+            "Please restart QGIS. If the problem persists, install manually via "
+            "OSGeo4W Shell:\n"
             "  pip install hydropandas brodata pandas xlsxwriter pyqtgraph",
         )
         raise
