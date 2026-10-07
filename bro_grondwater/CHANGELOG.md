@@ -7,12 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-- The code now passes flake8 with its default settings (79-character lines), so the plugin no longer ships a `.flake8` config file. The ruff formatter is configured for the same line length in `ruff.toml` at the repository root, outside the plugin ZIP.
-
-### Fixed
-- QGIS 4 / Qt6 enum warnings from the plugins.qgis.org check: `Qgis.Warning` is now the fully-scoped `Qgis.MessageLevel.Warning`.
-
 ### Planned
 - Additional filter options (multiple depth ranges, quality flags)
 - Custom map styling options
@@ -20,6 +14,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Batch export functionality
 - Advanced plotting options (multiple y-axes, custom date ranges)
 - Integration with other BRO datasets
+
+## [0.2.5] - 2026-10-07
+
+### Changed
+- The code now passes flake8 with its default settings (79-character lines), so the plugin no longer ships a `.flake8` config file. The ruff formatter is configured for the same line length in `ruff.toml` at the repository root, outside the plugin ZIP.
+
+### Fixed
+- QGIS 4 / Qt6 enum warnings from the plugins.qgis.org check: `Qgis.Warning` is now the fully-scoped `Qgis.MessageLevel.Warning`.
 
 ## [0.2.4] - 2026-10-07
 

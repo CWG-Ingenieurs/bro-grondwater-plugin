@@ -2,7 +2,7 @@
 
 A QGIS plugin for retrieving and analyzing BRO (Basisregistratie Ondergrond) groundwater monitoring well data using Hydropandas.
 
-![Version](https://img.shields.io/badge/version-0.2.4-blue)
+![Version](https://img.shields.io/badge/version-0.2.5-blue)
 ![QGIS](https://img.shields.io/badge/QGIS-4.x-green)
 ![License](https://img.shields.io/badge/license-MIT-orange)
 
