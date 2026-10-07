@@ -706,10 +706,10 @@ class BROGrondwaterPlugin:
                 "This may take a long time. Consider selecting fewer wells or "
                 "applying a filter first.\n\n"
                 f"Do you want to download the timeseries for all {len(features_to_download)} wells anyway?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
             )
-            if reply != QMessageBox.Yes:
+            if reply != QMessageBox.StandardButton.Yes:
                 self.dlg.statusLabel.setText("Download cancelled")
                 return
 
