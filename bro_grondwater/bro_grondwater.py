@@ -34,6 +34,58 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 from .bro_grondwater_dialog import BROGrondwaterPluginPanel
 
+PDOK_GM_URL = "https://api.pdok.nl/bzk/bro-gminsamenhang-karakteristieken/ogc/v1"
+RD_CRS_URI = "http://www.opengis.net/def/crs/EPSG/0/28992"
+
+
+def _pdok_gm_items(collection, extent_tuple):
+    """Return the properties of all features of a PDOK GM collection in an RD extent.
+
+    extent_tuple is (xmin, xmax, ymin, ymax) in EPSG:28992. Follows the OGC API
+    'next' links to page through the results.
+    """
+    import requests
+
+    xmin, xmax, ymin, ymax = extent_tuple
+    url = f"{PDOK_GM_URL}/collections/{collection}/items"
+    params = {
+        "f": "json",
+        "bbox": f"{xmin},{ymin},{xmax},{ymax}",
+        "bbox-crs": RD_CRS_URI,
+        "limit": 1000,
+    }
+    items = []
+    while url:
+        response = requests.get(url, params=params, timeout=60)
+        response.raise_for_status()
+        data = response.json()
+        items.extend(feature["properties"] for feature in data["features"])
+        # The 'next' link already carries all query parameters
+        url = next(
+            (link["href"] for link in data["links"] if link["rel"] == "next"), None
+        )
+        params = None
+    return items
+
+
+def _get_tubes_with_measurements(extent_tuple):
+    """Return {(gmw_bro_id, tube_number)} of tubes in the extent with measurements.
+
+    Uses the PDOK "GM in samenhang - karakteristieken" index: one query for the
+    groundwater level dossiers (GLD, with their number of observations) and one for
+    the monitoring tubes they belong to. No measurements are downloaded.
+    """
+    tube_pks = {
+        gld["gm_gmw_monitoringtube_fk"]
+        for gld in _pdok_gm_items("gm_gld", extent_tuple)
+        if (gld.get("number_of_observations") or 0) > 0
+    }
+    return {
+        (tube["gmw_bro_id"], int(tube["tube_number"]))
+        for tube in _pdok_gm_items("gm_gmw_monitoringtube", extent_tuple)
+        if tube["gm_gmw_monitoringtube_pk"] in tube_pks
+    }
+
 
 class BROGrondwaterPlugin:
     """QGIS Plugin Implementation."""
@@ -387,31 +439,11 @@ class BROGrondwaterPlugin:
 
             self.dlg.progressBar.setValue(30)
 
-            # Only locations with measurements (issue #17): hydropandas/brodata
-            # can only tell whether a location has measurements by actually
-            # downloading its measurement dossier (GLD), which is exactly what
-            # only_metadata=True skips. So filtering on "has measurements"
-            # means giving up the fast metadata-only retrieval for this call.
-            # - engine="brodata" already filters to locations with GLD data as
-            #   a side effect of only_metadata=False (see brodata.gmw.get_data_in_extent,
-            #   which intersects wells against its own GLD download); keep_all_obs
-            #   is not consulted at all on that code path.
-            # - engine="hydropandas" (fallback) only has real measurement data to
-            #   check emptiness against when only_metadata=False, so keep_all_obs=False
-            #   is also needed there to actually drop the empty ones.
             only_with_measurements = self.dlg.checkBoxOnlyWithMeasurements.isChecked()
-            only_metadata = not only_with_measurements
-            if only_with_measurements:
-                self.dlg.statusLabel.setText(
-                    "Retrieving well locations from BRO (checking for "
-                    "measurements, this may take longer)..."
-                )
 
             # Retrieve observations using hydropandas
             # Use read_bro for extent-based queries (returns ObsCollection)
-            # only_metadata=True by default for fast initial retrieval (measurements
-            # loaded on-demand); only_metadata=False when the "only locations with
-            # measurements" checkbox is on (see above).
+            # Use only_metadata=True for fast initial retrieval (measurements loaded on-demand)
             # Try brodata engine first (faster), fall back to default if not available
             engine_used = None
             try:
@@ -420,21 +452,35 @@ class BROGrondwaterPlugin:
                         extent=extent_tuple,
                         tmin=None,
                         tmax=None,
-                        only_metadata=only_metadata,
-                        keep_all_obs=not only_with_measurements,
+                        only_metadata=True,
                         engine="brodata",
                     )
                     engine_used = "brodata"
                 except TypeError:
                     # brodata engine not available, use default
                     obs_collection = hpd.read_bro(
-                        extent=extent_tuple,
-                        tmin=None,
-                        tmax=None,
-                        only_metadata=only_metadata,
-                        keep_all_obs=not only_with_measurements,
+                        extent=extent_tuple, tmin=None, tmax=None, only_metadata=True
                     )
                     engine_used = "default"
+
+                # Only locations with measurements (issue #17). keep_all_obs can't
+                # be used for this: it only drops observations that are empty, and
+                # with only_metadata=True every observation is empty. Instead look
+                # up which tubes have a groundwater level dossier (GLD) with
+                # observations in PDOK's "GM in samenhang" index, which doesn't
+                # require downloading any measurements.
+                if only_with_measurements and len(obs_collection) > 0:
+                    self.dlg.statusLabel.setText(
+                        "Checking which wells have measurements..."
+                    )
+                    tubes = _get_tubes_with_measurements(extent_tuple)
+                    mask = [
+                        (str(loc), int(tube_nr)) in tubes
+                        for loc, tube_nr in zip(
+                            obs_collection["location"], obs_collection["tube_nr"]
+                        )
+                    ]
+                    obs_collection = obs_collection[mask]
             except Exception as e:
                 QMessageBox.warning(
                     self.dlg,
@@ -452,7 +498,9 @@ class BROGrondwaterPlugin:
                 QMessageBox.information(
                     self.dlg,
                     "No Data",
-                    "No monitoring wells found in the current extent.",
+                    "No monitoring wells with measurements found in the current extent."
+                    if only_with_measurements
+                    else "No monitoring wells found in the current extent.",
                 )
                 self.dlg.progressBar.setValue(0)
                 self.dlg.statusLabel.setText("Ready")

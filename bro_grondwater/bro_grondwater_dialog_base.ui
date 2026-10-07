@@ -74,10 +74,10 @@
       <item>
        <widget class="QCheckBox" name="checkBoxOnlyWithMeasurements">
         <property name="toolTip">
-         <string>Filters out locations that have never had any groundwater level measurements. This requires downloading each location's measurement dossier during retrieval, which is slower than the default.</string>
+         <string>Only show monitoring tubes that have a groundwater level dossier (GLD) with measurements in the BRO. Checked against the PDOK 'GM in samenhang' index, so no measurements are downloaded.</string>
         </property>
         <property name="text">
-         <string>Only locations with measurements (slower)</string>
+         <string>Only locations with measurements</string>
         </property>
        </widget>
       </item>

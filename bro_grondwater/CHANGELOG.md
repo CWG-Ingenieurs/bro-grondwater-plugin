@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
-- "Only locations with measurements (slower)" checkbox next to "Retrieve Wells from Current Extent". When checked, locations that have never had any groundwater level measurements are filtered out. This requires downloading each location's measurement dossier during retrieval (both the brodata and the hydropandas-fallback engine can only tell a location has no measurements by actually fetching them), so it's slower than the default fast metadata-only retrieval (#17).
+- "Only locations with measurements" checkbox next to "Retrieve Wells from Current Extent". When checked, monitoring tubes without a groundwater level dossier (GLD) with measurements are filtered out. Which tubes have measurements is looked up in the PDOK "GM in samenhang - karakteristieken" index, so retrieval stays metadata-only and no measurements are downloaded (#17).
 
 ### Planned
 - Additional filter options (multiple depth ranges, quality flags)
