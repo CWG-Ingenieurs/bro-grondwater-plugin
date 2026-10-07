@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Code quality: the plugin passes flake8, the code-quality check of the plugins.qgis.org security scan. Removed unused imports, replaced bare `except:` clauses, wrapped lines longer than 88 characters, and added a `.flake8` that uses the same line length as the ruff formatter (#32).
+- Security scan: resolved all Bandit findings that blocked the 0.2.3 upload on plugins.qgis.org. The exported Excel file is now opened with Qt's `QDesktopServices` instead of `os.startfile`/`subprocess`, failed dependency installs are logged to the QGIS message log instead of silently ignored, and an unused helper with a `try/except/continue` was removed (#32).
 
 ### Fixed
 - `test_installation.py` always reported an error for "Plugin Loading": it looked up the plugin via `iface.plugins`, which doesn't exist; it now uses `qgis.utils.plugins` (#32).

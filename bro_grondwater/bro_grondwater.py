@@ -14,8 +14,15 @@ if sys.stderr is None:
 import os
 import re
 from concurrent.futures import ThreadPoolExecutor
-from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QTimer
-from qgis.PyQt.QtGui import QIcon
+from qgis.PyQt.QtCore import (
+    QSettings,
+    QTranslator,
+    QCoreApplication,
+    Qt,
+    QTimer,
+    QUrl,
+)
+from qgis.PyQt.QtGui import QDesktopServices, QIcon
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox, QDockWidget
 from qgis.core import (
     QgsProject,
@@ -1169,56 +1176,6 @@ class BROGrondwaterPlugin:
             print(f"Error fetching measurements for {gmw_id}: {e}")
             return None
 
-    def _get_numeric_values(self, obs):
-        """Extract numeric measurement values from GroundwaterObs object.
-
-        The obs object may be a Series or DataFrame. If DataFrame, find the
-        column with numeric measurement data (usually 'values' or 'stand').
-        """
-        # Fix stdout/stderr for QGIS
-        import io
-
-        if sys.stdout is None:
-            sys.stdout = io.StringIO()
-        if sys.stderr is None:
-            sys.stderr = io.StringIO()
-
-        import pandas as pd
-        import numpy as np
-
-        # If it's a Series, try to convert to numeric
-        if isinstance(obs, pd.Series):
-            numeric_vals = pd.to_numeric(obs, errors="coerce")
-            mask = ~np.isnan(numeric_vals)
-            return obs.index[mask], numeric_vals[mask]
-
-        # If it's a DataFrame, find the right column
-        if hasattr(obs, "columns"):
-            # Try common column names for groundwater measurements
-            for col_name in ["values", "stand", "head", "value"]:
-                if col_name in obs.columns:
-                    vals = pd.to_numeric(obs[col_name], errors="coerce")
-                    mask = ~np.isnan(vals)
-                    return obs.index[mask], vals[mask]
-
-            # Fall back to first numeric column
-            for col in obs.columns:
-                try:
-                    vals = pd.to_numeric(obs[col], errors="coerce")
-                    if vals.notna().any():
-                        mask = ~np.isnan(vals)
-                        return obs.index[mask], vals[mask]
-                except Exception:
-                    continue
-
-        # Last resort: try obs.values directly but filter non-numeric
-        try:
-            vals = pd.to_numeric(pd.Series(obs.values), errors="coerce")
-            mask = ~np.isnan(vals)
-            return obs.index[mask], vals.values[mask]
-        except Exception:
-            return None, None
-
     def _save_plot(self, plot_widget):
         """Save the current plot as a PNG image."""
         from datetime import datetime
@@ -1682,19 +1639,12 @@ class BROGrondwaterPlugin:
                 f"Exported measurements for {exported_count} wells.",
             )
 
-            # Open the Excel file
-            try:
-                import subprocess
-
-                if sys.platform == "win32":
-                    os.startfile(file_path)
-                elif sys.platform == "darwin":  # macOS
-                    subprocess.run(["open", file_path])
-                else:  # Linux
-                    subprocess.run(["xdg-open", file_path])
-            except Exception as open_error:
-                # Don't fail if we can't open the file
-                print(f"Could not open file: {open_error}")
+            # Open the Excel file with the default application. QDesktopServices
+            # works on all platforms without starting processes ourselves.
+            if not QDesktopServices.openUrl(QUrl.fromLocalFile(file_path)):
+                QgsMessageLog.logMessage(
+                    f"Could not open {file_path}", "BRO Grondwater", Qgis.Warning
+                )
 
         except ImportError:
             QMessageBox.critical(
