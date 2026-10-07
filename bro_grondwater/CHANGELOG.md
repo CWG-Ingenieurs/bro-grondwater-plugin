@@ -7,12 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Changed
-- Code quality: the plugin passes flake8, the code-quality check of the plugins.qgis.org security scan. Removed unused imports, replaced bare `except:` clauses, wrapped lines longer than 88 characters, and added a `.flake8` that uses the same line length as the ruff formatter (#32).
-
-### Fixed
-- `test_installation.py` always reported an error for "Plugin Loading": it looked up the plugin via `iface.plugins`, which doesn't exist; it now uses `qgis.utils.plugins` (#32).
-
 ### Planned
 - Additional filter options (multiple depth ranges, quality flags)
 - Custom map styling options
@@ -20,6 +14,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Batch export functionality
 - Advanced plotting options (multiple y-axes, custom date ranges)
 - Integration with other BRO datasets
+
+## [0.2.4] - 2026-10-07
+
+### Changed
+- Code quality: the plugin passes flake8, the code-quality check of the plugins.qgis.org security scan. Removed unused imports, replaced bare `except:` clauses, wrapped lines longer than 88 characters, and added a `.flake8` that uses the same line length as the ruff formatter (#32).
+- Security scan: resolved all Bandit findings that blocked the 0.2.3 upload on plugins.qgis.org. The exported Excel file is now opened with Qt's `QDesktopServices` instead of `os.startfile`/`subprocess`, failed dependency installs are logged to the QGIS message log instead of silently ignored, and an unused helper with a `try/except/continue` was removed (#32).
+
+### Fixed
+- `test_installation.py` always reported an error for "Plugin Loading": it looked up the plugin via `iface.plugins`, which doesn't exist; it now uses `qgis.utils.plugins` (#32).
 
 ## [0.2.3] - 2026-10-07
 

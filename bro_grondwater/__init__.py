@@ -56,15 +56,21 @@ def _needs_install(package, minimum):
 def _install_dependencies():
     """Install missing packages and upgrade ones below their minimum version."""
     for package, minimum in DEPENDENCIES.items():
+        requirement = f"{package}>={minimum}" if minimum else package
         try:
             if not _needs_install(package, minimum):
                 continue
             from pip._internal.cli.main import main as pip_main
 
-            requirement = f"{package}>={minimum}" if minimum else package
             pip_main(["install", "--quiet", requirement])
-        except Exception:
-            pass
+        except Exception as e:
+            # Don't block loading the plugin; a missing package is reported
+            # when classFactory imports the plugin.
+            from qgis.core import Qgis, QgsMessageLog
+
+            QgsMessageLog.logMessage(
+                f"Could not install {requirement}: {e}", "BRO Grondwater", Qgis.Warning
+            )
 
 
 _install_dependencies()
