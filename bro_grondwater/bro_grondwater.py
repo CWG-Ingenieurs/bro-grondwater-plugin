@@ -446,7 +446,7 @@ class BROGrondwaterPlugin:
                     "Missing Dependency",
                     "Hydropandas is not installed.\n\n"
                     "Install via OSGeo4W Shell:\n"
-                    "  pip install hydropandas pandas xlsxwriter matplotlib brodata",
+                    "  pip install hydropandas brodata pandas xlsxwriter pyqtgraph",
                 )
                 return
 
