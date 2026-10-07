@@ -34,6 +34,98 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QVariant
 from .bro_grondwater_dialog import BROGrondwaterPluginPanel
 
+# Why a measurement download failed: (short label, explanation for the user)
+DOWNLOAD_FAILURE_REASONS = {
+    "no_data": (
+        "without measurements",
+        "These tubes have no groundwater level measurements in the BRO. Check "
+        "'Only locations with measurements' before retrieving wells to hide them.",
+    ),
+    "no_gmw_id": (
+        "without BRO ID",
+        "No BRO well ID (GMW...) was found for these wells, so they can't be "
+        "looked up.",
+    ),
+    "rate_limited": (
+        "refused by the BRO (too many requests)",
+        "The BRO server was busy. Download these wells again later.",
+    ),
+    "network": (
+        "with a connection error",
+        "The BRO server could not be reached. Check your internet connection "
+        "and download these wells again.",
+    ),
+    "error": (
+        "with an error",
+        "See 'Show Details' or the BRO Grondwater tab in the QGIS log messages.",
+    ),
+}
+
+
+def _classify_download_error(exception):
+    """Return the DOWNLOAD_FAILURE_REASONS key for a download exception."""
+    import requests
+
+    error_str = str(exception)
+    if "429" in error_str or "Too Many Requests" in error_str:
+        return "rate_limited"
+    if isinstance(exception, (requests.ConnectionError, requests.Timeout)):
+        return "network"
+    return "error"
+
+
+PDOK_GM_URL = "https://api.pdok.nl/bzk/bro-gminsamenhang-karakteristieken/ogc/v1"
+RD_CRS_URI = "http://www.opengis.net/def/crs/EPSG/0/28992"
+
+
+def _pdok_gm_items(collection, extent_tuple):
+    """Return the properties of all features of a PDOK GM collection in an RD extent.
+
+    extent_tuple is (xmin, xmax, ymin, ymax) in EPSG:28992. Follows the OGC API
+    'next' links to page through the results.
+    """
+    import requests
+
+    xmin, xmax, ymin, ymax = extent_tuple
+    url = f"{PDOK_GM_URL}/collections/{collection}/items"
+    params = {
+        "f": "json",
+        "bbox": f"{xmin},{ymin},{xmax},{ymax}",
+        "bbox-crs": RD_CRS_URI,
+        "limit": 1000,
+    }
+    items = []
+    while url:
+        response = requests.get(url, params=params, timeout=60)
+        response.raise_for_status()
+        data = response.json()
+        items.extend(feature["properties"] for feature in data["features"])
+        # The 'next' link already carries all query parameters
+        url = next(
+            (link["href"] for link in data["links"] if link["rel"] == "next"), None
+        )
+        params = None
+    return items
+
+
+def _get_tubes_with_measurements(extent_tuple):
+    """Return {(gmw_bro_id, tube_number)} of tubes in the extent with measurements.
+
+    Uses the PDOK "GM in samenhang - karakteristieken" index: one query for the
+    groundwater level dossiers (GLD, with their number of observations) and one for
+    the monitoring tubes they belong to. No measurements are downloaded.
+    """
+    tube_pks = {
+        gld["gm_gmw_monitoringtube_fk"]
+        for gld in _pdok_gm_items("gm_gld", extent_tuple)
+        if (gld.get("number_of_observations") or 0) > 0
+    }
+    return {
+        (tube["gmw_bro_id"], int(tube["tube_number"]))
+        for tube in _pdok_gm_items("gm_gmw_monitoringtube", extent_tuple)
+        if tube["gm_gmw_monitoringtube_pk"] in tube_pks
+    }
+
 
 class BROGrondwaterPlugin:
     """QGIS Plugin Implementation."""
@@ -387,6 +479,8 @@ class BROGrondwaterPlugin:
 
             self.dlg.progressBar.setValue(30)
 
+            only_with_measurements = self.dlg.checkBoxOnlyWithMeasurements.isChecked()
+
             # Retrieve observations using hydropandas
             # Use read_bro for extent-based queries (returns ObsCollection)
             # Use only_metadata=True for fast initial retrieval (measurements loaded on-demand)
@@ -408,6 +502,25 @@ class BROGrondwaterPlugin:
                         extent=extent_tuple, tmin=None, tmax=None, only_metadata=True
                     )
                     engine_used = "default"
+
+                # Only locations with measurements (issue #17). keep_all_obs can't
+                # be used for this: it only drops observations that are empty, and
+                # with only_metadata=True every observation is empty. Instead look
+                # up which tubes have a groundwater level dossier (GLD) with
+                # observations in PDOK's "GM in samenhang" index, which doesn't
+                # require downloading any measurements.
+                if only_with_measurements and len(obs_collection) > 0:
+                    self.dlg.statusLabel.setText(
+                        "Checking which wells have measurements..."
+                    )
+                    tubes = _get_tubes_with_measurements(extent_tuple)
+                    mask = [
+                        (str(loc), int(tube_nr)) in tubes
+                        for loc, tube_nr in zip(
+                            obs_collection["location"], obs_collection["tube_nr"]
+                        )
+                    ]
+                    obs_collection = obs_collection[mask]
             except Exception as e:
                 QMessageBox.warning(
                     self.dlg,
@@ -425,7 +538,9 @@ class BROGrondwaterPlugin:
                 QMessageBox.information(
                     self.dlg,
                     "No Data",
-                    "No monitoring wells found in the current extent.",
+                    "No monitoring wells with measurements found in the current extent."
+                    if only_with_measurements
+                    else "No monitoring wells found in the current extent.",
                 )
                 self.dlg.progressBar.setValue(0)
                 self.dlg.statusLabel.setText("Ready")
@@ -515,8 +630,9 @@ class BROGrondwaterPlugin:
                 print(f"Style file not found: {qml_path}")
 
             self.dlg.progressBar.setValue(100)
+            filter_suffix = " with measurements" if only_with_measurements else ""
             self.dlg.statusLabel.setText(
-                f"Retrieved {len(features)} wells (engine: {engine_used})"
+                f"Retrieved {len(features)} wells{filter_suffix} (engine: {engine_used})"
             )
 
             # Store observation collection for later use
@@ -563,8 +679,14 @@ class BROGrondwaterPlugin:
             self.iface.mapCanvas().refresh()
 
             filtered_count = self.wells_layer.featureCount()
+            range_text = (
+                f"between {min_depth:g} and {max_depth:g}"
+                if max_depth > min_depth
+                else f"at or above {min_depth:g}"
+            )
             self.dlg.statusLabel.setText(
-                f"Filter applied: {filtered_count} wells visible"
+                f"Filter applied: {filtered_count} wells visible "
+                f"(top of screen {range_text} m NAP)"
             )
 
             # Zoom to filtered features if any
@@ -630,10 +752,10 @@ class BROGrondwaterPlugin:
                 "This may take a long time. Consider selecting fewer wells or "
                 "applying a filter first.\n\n"
                 f"Do you want to download the timeseries for all {len(features_to_download)} wells anyway?",
-                QMessageBox.Yes | QMessageBox.No,
-                QMessageBox.No,
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.No,
             )
-            if reply != QMessageBox.Yes:
+            if reply != QMessageBox.StandardButton.Yes:
                 self.dlg.statusLabel.setText("Download cancelled")
                 return
 
@@ -646,6 +768,7 @@ class BROGrondwaterPlugin:
         self._expected_results = len(features_to_download)
         self._downloaded_count = 0
         self._failed_count = 0
+        self._failures = []
         self._futures = []
 
         # Start ThreadPoolExecutor
@@ -693,6 +816,7 @@ class BROGrondwaterPlugin:
                 "success": False,
                 "cache_key": cache_key,
                 "error": "No GMW ID found",
+                "reason": "no_gmw_id",
                 "name": name,
                 "bro_id": bro_id,
                 "tube_nr": tube_nr,
@@ -744,6 +868,7 @@ class BROGrondwaterPlugin:
                         "success": False,
                         "cache_key": cache_key,
                         "error": "No data returned",
+                        "reason": "no_data",
                         "name": name,
                         "bro_id": bro_id,
                         "tube_nr": tube_nr,
@@ -759,6 +884,7 @@ class BROGrondwaterPlugin:
                     "success": False,
                     "cache_key": cache_key,
                     "error": error_str,
+                    "reason": _classify_download_error(e),
                     "name": name,
                     "bro_id": bro_id,
                     "tube_nr": tube_nr,
@@ -793,10 +919,14 @@ class BROGrondwaterPlugin:
                         "BRO Grondwater",
                         Qgis.Warning,
                     )
+                    self._failures.append(result)
                     self._failed_count += 1
             except Exception as e:
                 QgsMessageLog.logMessage(
                     f"Error processing result: {e}", "BRO Grondwater", Qgis.Warning
+                )
+                self._failures.append(
+                    {"name": "unknown", "error": str(e), "reason": "error"}
                 )
                 self._failed_count += 1
 
@@ -831,7 +961,17 @@ class BROGrondwaterPlugin:
         self.dlg.progressBar.setValue(100)
         status_msg = f"Downloaded {downloaded_count} wells"
         if failed_count > 0:
-            status_msg += f" ({failed_count} failed)"
+            reason_counts = {}
+            for failure in self._failures:
+                reason = failure.get("reason", "error")
+                reason_counts[reason] = reason_counts.get(reason, 0) + 1
+            status_msg += (
+                f", {failed_count} not downloaded: "
+                + ", ".join(
+                    f"{count} {DOWNLOAD_FAILURE_REASONS[reason][0]}"
+                    for reason, count in reason_counts.items()
+                )
+            )
         self.dlg.labelDownloadStatus.setText(status_msg)
         self.dlg.labelDownloadStatus.setStyleSheet(
             "color: #006600; font-style: normal;"
@@ -839,6 +979,41 @@ class BROGrondwaterPlugin:
         self.dlg.statusLabel.setText(status_msg)
 
         self._end_operation()
+
+        if failed_count > 0:
+            self._show_download_failures()
+
+    def _show_download_failures(self):
+        """Explain per reason which wells could not be downloaded."""
+        by_reason = {}
+        for failure in self._failures:
+            by_reason.setdefault(failure.get("reason", "error"), []).append(failure)
+
+        sections = []
+        for reason, failures in by_reason.items():
+            label, explanation = DOWNLOAD_FAILURE_REASONS[reason]
+            names = [
+                str(f.get("name") or f.get("bro_id") or "unknown") for f in failures
+            ]
+            shown = ", ".join(names[:10])
+            if len(names) > 10:
+                shown += f" and {len(names) - 10} more"
+            sections.append(f"{len(failures)} {label}\n{explanation}\n{shown}")
+
+        msg = QMessageBox(self.dlg)
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setWindowTitle("Not all wells downloaded")
+        msg.setText(
+            f"{len(self._failures)} of {self._expected_results} wells were not "
+            "downloaded:\n\n" + "\n\n".join(sections)
+        )
+        msg.setDetailedText(
+            "\n".join(
+                f"{f.get('name', 'unknown')}: {f.get('error', 'Unknown')}"
+                for f in self._failures
+            )
+        )
+        msg.exec()
 
     def _cancel_download(self):
         """Cancel the download process."""
@@ -1078,7 +1253,7 @@ class BROGrondwaterPlugin:
                     "  pip install pyqtgraph",
                 )
                 return
-            from datetime import datetime as dt
+            from datetime import datetime as dt, timezone
             from qgis.PyQt.QtWidgets import (
                 QDialog,
                 QVBoxLayout,
@@ -1095,8 +1270,10 @@ class BROGrondwaterPlugin:
             plot_dialog.resize(800, 500)
             layout = QVBoxLayout()
 
-            # Time series plot with date axis
-            date_axis = pg.DateAxisItem(orientation="bottom")
+            # Time series plot with date axis. The measurement dates are naive and
+            # are converted to timestamps as if they were UTC (see below), so the
+            # axis must not shift them to local time either.
+            date_axis = pg.DateAxisItem(orientation="bottom", utcOffset=0)
             plot_widget = pg.PlotWidget(axisItems={"bottom": date_axis})
             plot_widget.setBackground("w")
             plot_widget.showGrid(x=True, y=True, alpha=0.3)
@@ -1136,8 +1313,12 @@ class BROGrondwaterPlugin:
                     gmw_match = re.search(r"GMW\d+", str(name) + str(bro_id))
                     label = gmw_match.group(0) if gmw_match else (name or bro_id)
 
+                    # Interpret naive dates as UTC: naive datetime.timestamp() asks
+                    # the OS for the local time, which fails on Windows for dates
+                    # before 1970 ("[Errno 22] Invalid argument", issue #26).
                     timestamps = [
-                        dt.fromisoformat(d).timestamp() for d in series_data["dates"]
+                        dt.fromisoformat(d).replace(tzinfo=timezone.utc).timestamp()
+                        for d in series_data["dates"]
                     ]
                     values = series_data["values"]
 

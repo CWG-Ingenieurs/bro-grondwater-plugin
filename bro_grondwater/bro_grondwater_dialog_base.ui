@@ -72,6 +72,19 @@
        <number>4</number>
       </property>
       <item>
+       <widget class="QCheckBox" name="checkBoxOnlyWithMeasurements">
+        <property name="toolTip">
+         <string>Only show monitoring tubes that have a groundwater level dossier (GLD) with measurements in the BRO. Checked against the PDOK 'GM in samenhang' index, so no measurements are downloaded.</string>
+        </property>
+        <property name="text">
+         <string>Only locations with measurements</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <widget class="QPushButton" name="btnRetrieveWells">
         <property name="text">
          <string>Retrieve Wells from Current Extent</string>
@@ -83,8 +96,11 @@
    </item>
    <item>
     <widget class="QGroupBox" name="groupBoxFilter">
+     <property name="toolTip">
+      <string>Filters on the top of the filter screen (bovenkant filter, screen_top), in m NAP. The bottom of the screen is not used.</string>
+     </property>
      <property name="title">
-      <string>3. Filter by Depth (m NAP)</string>
+      <string>3. Filter by Top of Screen (m NAP)</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayoutFilter">
       <property name="spacing">
@@ -128,12 +144,15 @@
         <item>
          <widget class="QLabel" name="label_2">
           <property name="text">
-           <string>Min:</string>
+           <string>Min top:</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="spinMinDepth">
+          <property name="toolTip">
+           <string>Lowest top of filter screen (screen_top) to show, in m NAP</string>
+          </property>
           <property name="minimum">
            <double>-100.000000000000000</double>
           </property>
@@ -148,12 +167,15 @@
         <item>
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>Max:</string>
+           <string>Max top:</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QDoubleSpinBox" name="spinMaxDepth">
+          <property name="toolTip">
+           <string>Highest top of filter screen (screen_top) to show, in m NAP</string>
+          </property>
           <property name="minimum">
            <double>-100.000000000000000</double>
           </property>

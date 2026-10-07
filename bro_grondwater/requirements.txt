@@ -1,10 +1,20 @@
 # Python dependencies for BRO Grondwater Plugin
-# These are automatically installed when the plugin loads
+# These are automatically installed (or upgraded to the minimum version) when the
+# plugin loads, see DEPENDENCIES in __init__.py. Keep both lists in sync.
 
 # Core dependencies
+hydropandas
+brodata
 pandas>=1.3.0
 xlsxwriter>=3.0.0
-hydropandas
 pyqtgraph
 
-# Note: QGIS/PyQt and pyqtgraph are provided by the QGIS installation
+# Minimum versions without known vulnerabilities (CVEs), issue #25
+requests>=2.33.0
+urllib3>=2.8.0
+idna>=3.15
+certifi>=2024.7.4
+tqdm>=4.66.3
+
+# Note: QGIS/PyQt and compiled packages (numpy, pillow, lxml) are provided by the
+# QGIS installation; update those by updating QGIS.
