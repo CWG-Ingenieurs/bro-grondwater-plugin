@@ -15,9 +15,11 @@ if sys.stderr is None:
 
 # Packages installed into the QGIS Python environment, with minimum versions.
 # The minimums of the pure-Python HTTP stack (requests, urllib3, idna, certifi)
-# and tqdm avoid versions with known vulnerabilities (CVEs, issue #25). Compiled
+# and tqdm avoid versions with known vulnerabilities (CVEs, issue #25).
+# Compiled
 # packages that ship with QGIS (numpy, pillow, lxml, ...) are deliberately not
-# upgraded from here: replacing them with pip can break QGIS itself. Keep in sync
+# upgraded from here: replacing them with pip can break QGIS itself. Keep in
+# sync
 # with requirements.txt and pip_dependencies in metadata.txt.
 DEPENDENCIES = {
     "hydropandas": None,
@@ -54,7 +56,7 @@ def _needs_install(package, minimum):
 
 
 def _install_dependencies():
-    """Install missing packages and upgrade ones below their minimum version."""
+    """Install missing packages and upgrade outdated ones."""
     for package, minimum in DEPENDENCIES.items():
         requirement = f"{package}>={minimum}" if minimum else package
         try:
@@ -69,7 +71,9 @@ def _install_dependencies():
             from qgis.core import Qgis, QgsMessageLog
 
             QgsMessageLog.logMessage(
-                f"Could not install {requirement}: {e}", "BRO Grondwater", Qgis.Warning
+                f"Could not install {requirement}: {e}",
+                "BRO Grondwater",
+                Qgis.MessageLevel.Warning,
             )
 
 
@@ -93,7 +97,8 @@ def classFactory(iface):
             None,
             "BRO Grondwater Plugin",
             f"Missing dependency: {e}\n\n"
-            "Please restart QGIS. If the problem persists, install manually via "
+            "Please restart QGIS. If the problem persists, install manually "
+            "via "
             "OSGeo4W Shell:\n"
             "  pip install hydropandas brodata pandas xlsxwriter pyqtgraph",
         )

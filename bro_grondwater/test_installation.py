@@ -54,7 +54,8 @@ def test_plugin():
         version = getattr(hpd, "__version__", "Unknown")
         print(f"✓ Hydropandas version: {version}")
         print(
-            "  ℹ Plugin will use brodata engine if available, otherwise standard method"
+            "  ℹ Plugin will use brodata engine if available, otherwise "
+            "standard method"
         )
     except ImportError:
         print("✗ Hydropandas not available")
@@ -121,7 +122,9 @@ def test_plugin():
         print("✗ SOME TESTS FAILED")
         print()
         print("Please install missing dependencies:")
-        print("pip install git+https://github.com/ArtesiaWater/hydropandas.git")
+        print(
+            "pip install git+https://github.com/ArtesiaWater/hydropandas.git"
+        )
         print("pip install pandas xlsxwriter matplotlib")
     print("=" * 50)
 

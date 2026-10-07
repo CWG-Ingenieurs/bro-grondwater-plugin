@@ -6,7 +6,8 @@ import os
 from qgis.PyQt import uic
 from qgis.PyQt.QtWidgets import QWidget
 
-# This loads your .ui file so that PyQt can populate your plugin with the elements
+# This loads your .ui file so that PyQt can populate your plugin with the
+# elements
 # from Qt Designer
 FORM_CLASS, _ = uic.loadUiType(
     os.path.join(os.path.dirname(__file__), "bro_grondwater_dialog_base.ui")
