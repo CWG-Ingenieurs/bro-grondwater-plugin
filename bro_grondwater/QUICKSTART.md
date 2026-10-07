@@ -44,11 +44,11 @@ print("✓ All dependencies installed!")
 4. Wait 10-30 seconds for data retrieval
 
 ### Step 2: Filter Wells
-1. In the "Filter by Depth" section:
-   - Set **Min Depth**: 0 m
-   - Set **Max Depth**: 20 m
-2. Click **"Apply Filter"**
-3. Only shallow wells will be visible
+1. In the "Filter by Top of Screen (m NAP)" section:
+   - Set **Min top**: -20 (m NAP)
+   - Set **Max top**: 0 (m NAP)
+2. Click **"Apply"**
+3. Only tubes whose screen top (bovenkant filter) lies between -20 and 0 m NAP will be visible
 
 ### Step 3: Analyze Data
 1. Use QGIS selection tool (click wells on map)

@@ -13,6 +13,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - `AttributeError: type object 'QMessageBox' has no attribute 'Yes'` when confirming a download of more than 20 wells. QGIS 4 uses PyQt6, which requires the fully-scoped `QMessageBox.StandardButton.Yes`/`.No` instead of the flat `QMessageBox.Yes`/`.No` shortcuts PyQt5 allowed (#18).
 
+### Changed
+- "Only locations with measurements" is now checked by default (#22).
+- The depth filter is now labelled "Filter by Top of Screen (m NAP)", with tooltips and a status message stating that it filters on the top of the filter screen (`screen_top`, bovenkant filter) in m NAP (#21).
+- After downloading measurements, wells that could not be downloaded are grouped by reason (no measurements in the BRO, no BRO ID, too many requests, connection error, other error) in the status message and in a dialog that lists the affected wells, instead of only "(N failed)" (#23).
+
+### Security
+- The plugin's dependency installer now also upgrades packages that are installed but older than their minimum version. Raised minimums to avoid versions with known vulnerabilities: requests>=2.33.0, urllib3>=2.8.0, idna>=3.15, certifi>=2024.7.4, tqdm>=4.66.3. Compiled packages that ship with QGIS (numpy, pillow, lxml) are not upgraded by the plugin (#25).
+
 ### Planned
 - Additional filter options (multiple depth ranges, quality flags)
 - Custom map styling options
