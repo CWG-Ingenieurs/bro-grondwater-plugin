@@ -45,7 +45,8 @@ DOWNLOAD_FAILURE_REASONS = {
     "no_data": (
         "without measurements",
         "These tubes have no groundwater level measurements in the BRO. Check "
-        "'Only locations with measurements' before retrieving wells to hide them.",
+        "'Only locations with measurements' before retrieving wells to hide "
+        "them.",
     ),
     "no_gmw_id": (
         "without BRO ID",
@@ -63,7 +64,8 @@ DOWNLOAD_FAILURE_REASONS = {
     ),
     "error": (
         "with an error",
-        "See 'Show Details' or the BRO Grondwater tab in the QGIS log messages.",
+        "See 'Show Details' or the BRO Grondwater tab in the QGIS log "
+        "messages.",
     ),
 }
 
@@ -80,15 +82,17 @@ def _classify_download_error(exception):
     return "error"
 
 
-PDOK_GM_URL = "https://api.pdok.nl/bzk/bro-gminsamenhang-karakteristieken/ogc/v1"
+PDOK_GM_URL = (
+    "https://api.pdok.nl/bzk/bro-gminsamenhang-karakteristieken/ogc/v1"
+)
 RD_CRS_URI = "http://www.opengis.net/def/crs/EPSG/0/28992"
 
 
 def _pdok_gm_items(collection, extent_tuple):
-    """Return the properties of all features of a PDOK GM collection in an RD extent.
+    """Return the properties of the features of a PDOK GM collection.
 
-    extent_tuple is (xmin, xmax, ymin, ymax) in EPSG:28992. Follows the OGC API
-    'next' links to page through the results.
+    Only features within extent_tuple, (xmin, xmax, ymin, ymax) in EPSG:28992,
+    are returned. Follows the OGC API 'next' links to page through the results.
     """
     import requests
 
@@ -108,18 +112,20 @@ def _pdok_gm_items(collection, extent_tuple):
         items.extend(feature["properties"] for feature in data["features"])
         # The 'next' link already carries all query parameters
         url = next(
-            (link["href"] for link in data["links"] if link["rel"] == "next"), None
+            (link["href"] for link in data["links"] if link["rel"] == "next"),
+            None,
         )
         params = None
     return items
 
 
 def _get_tubes_with_measurements(extent_tuple):
-    """Return {(gmw_bro_id, tube_number)} of tubes in the extent with measurements.
+    """Return {(gmw_bro_id, tube_number)} of tubes that have measurements.
 
-    Uses the PDOK "GM in samenhang - karakteristieken" index: one query for the
-    groundwater level dossiers (GLD, with their number of observations) and one for
-    the monitoring tubes they belong to. No measurements are downloaded.
+    Only tubes within extent_tuple are considered. Uses the PDOK "GM in
+    samenhang - karakteristieken" index: one query for the groundwater level
+    dossiers (GLD, with their number of observations) and one for the
+    monitoring tubes they belong to. No measurements are downloaded.
     """
     tube_pks = {
         gld["gm_gmw_monitoringtube_fk"]
@@ -237,7 +243,9 @@ class BROGrondwaterPlugin:
     def unload(self):
         """Removes the plugin menu item and icon from QGIS GUI."""
         for action in self.actions:
-            self.iface.removePluginMenu(self.tr("&BRO Grondwater Plugin"), action)
+            self.iface.removePluginMenu(
+                self.tr("&BRO Grondwater Plugin"), action
+            )
             self.iface.removeToolBarIcon(action)
         del self.toolbar
 
@@ -260,13 +268,17 @@ class BROGrondwaterPlugin:
             self.dlg.btnAddWmsLayer.clicked.connect(self.add_wms_layer)
             self.dlg.btnRetrieveWells.clicked.connect(self.retrieve_wells)
             self.dlg.btnApplyFilter.clicked.connect(self.apply_filter)
-            self.dlg.btnDownloadMeasurements.clicked.connect(self.download_measurements)
+            self.dlg.btnDownloadMeasurements.clicked.connect(
+                self.download_measurements
+            )
             self.dlg.btnPlotData.clicked.connect(self.plot_measurements)
             self.dlg.btnExportExcel.clicked.connect(self.export_to_excel)
             self.dlg.btnCancel.clicked.connect(self._cancel_operation)
 
             # Create dock widget and add panel
-            self.dock_widget = QDockWidget("BRO Grondwater", self.iface.mainWindow())
+            self.dock_widget = QDockWidget(
+                "BRO Grondwater", self.iface.mainWindow()
+            )
             self.dock_widget.setWidget(self.dlg)
             self.dock_widget.setAllowedAreas(
                 Qt.DockWidgetArea.LeftDockWidgetArea
@@ -318,7 +330,9 @@ class BROGrondwaterPlugin:
                 "request=GetCapabilities&service=WMS"
             )
 
-            self.wms_layer = QgsRasterLayer(wms_url, "BRO GMW Locations (WMS)", "wms")
+            self.wms_layer = QgsRasterLayer(
+                wms_url, "BRO GMW Locations (WMS)", "wms"
+            )
 
             if self.wms_layer.isValid():
                 QgsProject.instance().addMapLayer(self.wms_layer)
@@ -327,7 +341,8 @@ class BROGrondwaterPlugin:
                 QMessageBox.warning(
                     self.dlg,
                     "WMS Error",
-                    "Could not load WMS layer. Check your internet connection.",
+                    "Could not load WMS layer. Check your internet "
+                    "connection.",
                 )
                 self.wms_layer = None
 
@@ -359,7 +374,8 @@ class BROGrondwaterPlugin:
                     self.basemap_layer = None
 
             # WMTS URL for BRT background map
-            # Using contextualWMSLegend=0 and dpiMode=7 for better compatibility
+            # Using contextualWMSLegend=0 and dpiMode=7 for better
+            # compatibility
             wmts_url = (
                 "contextualWMSLegend=0&"
                 "crs=EPSG:28992&"
@@ -402,14 +418,17 @@ class BROGrondwaterPlugin:
                 QMessageBox.warning(
                     self.dlg,
                     "Basemap Error",
-                    "Could not load basemap. Check your internet connection.\n\n"
+                    "Could not load basemap. Check your internet "
+                    "connection.\n\n"
                     "You can manually add the BRT basemap via:\n"
                     "Layer > Add Layer > Add WMS/WMTS Layer",
                 )
                 self.basemap_layer = None
 
         except Exception as e:
-            QMessageBox.critical(self.dlg, "Error", f"Error adding basemap:\n{str(e)}")
+            QMessageBox.critical(
+                self.dlg, "Error", f"Error adding basemap:\n{str(e)}"
+            )
 
     def _start_operation(self):
         """Prepare UI for a long-running operation."""
@@ -456,7 +475,8 @@ class BROGrondwaterPlugin:
                     "Missing Dependency",
                     "Hydropandas is not installed.\n\n"
                     "Install via OSGeo4W Shell:\n"
-                    "  pip install hydropandas brodata pandas xlsxwriter pyqtgraph",
+                    "  pip install hydropandas brodata pandas xlsxwriter "
+                    "pyqtgraph",
                 )
                 return
 
@@ -466,9 +486,12 @@ class BROGrondwaterPlugin:
             crs = canvas.mapSettings().destinationCrs()
 
             self.dlg.progressBar.setValue(10)
-            self.dlg.statusLabel.setText("Retrieving well locations from BRO...")
+            self.dlg.statusLabel.setText(
+                "Retrieving well locations from BRO..."
+            )
 
-            # Transform extent to RD (EPSG:28992) if needed (hydropandas default)
+            # Transform extent to RD (EPSG:28992) if needed (hydropandas
+            # default)
             if crs.authid() != "EPSG:28992":
                 transform = QgsCoordinateTransform(
                     crs,
@@ -489,13 +512,17 @@ class BROGrondwaterPlugin:
 
             self.dlg.progressBar.setValue(30)
 
-            only_with_measurements = self.dlg.checkBoxOnlyWithMeasurements.isChecked()
+            only_with_measurements = (
+                self.dlg.checkBoxOnlyWithMeasurements.isChecked()
+            )
 
             # Retrieve observations using hydropandas
             # Use read_bro for extent-based queries (returns ObsCollection)
-            # Use only_metadata=True for fast initial retrieval (measurements loaded
+            # Use only_metadata=True for fast initial retrieval (measurements
+            # loaded
             # on-demand)
-            # Try brodata engine first (faster), fall back to default if not available
+            # Try brodata engine first (faster), fall back to default if not
+            # available
             engine_used = None
             try:
                 try:
@@ -510,13 +537,19 @@ class BROGrondwaterPlugin:
                 except TypeError:
                     # brodata engine not available, use default
                     obs_collection = hpd.read_bro(
-                        extent=extent_tuple, tmin=None, tmax=None, only_metadata=True
+                        extent=extent_tuple,
+                        tmin=None,
+                        tmax=None,
+                        only_metadata=True,
                     )
                     engine_used = "default"
 
-                # Only locations with measurements (issue #17). keep_all_obs can't
-                # be used for this: it only drops observations that are empty, and
-                # with only_metadata=True every observation is empty. Instead look
+                # Only locations with measurements (issue #17). keep_all_obs
+                # can't
+                # be used for this: it only drops observations that are empty,
+                # and
+                # with only_metadata=True every observation is empty. Instead
+                # look
                 # up which tubes have a groundwater level dossier (GLD) with
                 # observations in PDOK's "GM in samenhang" index, which doesn't
                 # require downloading any measurements.
@@ -528,7 +561,8 @@ class BROGrondwaterPlugin:
                     mask = [
                         (str(loc), int(tube_nr)) in tubes
                         for loc, tube_nr in zip(
-                            obs_collection["location"], obs_collection["tube_nr"]
+                            obs_collection["location"],
+                            obs_collection["tube_nr"],
                         )
                     ]
                     obs_collection = obs_collection[mask]
@@ -549,7 +583,8 @@ class BROGrondwaterPlugin:
                 QMessageBox.information(
                     self.dlg,
                     "No Data",
-                    "No monitoring wells with measurements found in the current extent."
+                    "No monitoring wells with measurements found in the "
+                    "current extent."
                     if only_with_measurements
                     else "No monitoring wells found in the current extent.",
                 )
@@ -611,9 +646,13 @@ class BROGrondwaterPlugin:
                     metadata.get("bro_id", row.get("bro_id", "")),
                     x,
                     y,
-                    metadata.get("ground_level", row.get("ground_level", None)),
+                    metadata.get(
+                        "ground_level", row.get("ground_level", None)
+                    ),
                     metadata.get("screen_top", row.get("screen_top", None)),
-                    metadata.get("screen_bottom", row.get("screen_bottom", None)),
+                    metadata.get(
+                        "screen_bottom", row.get("screen_bottom", None)
+                    ),
                     metadata.get("tube_top", row.get("tube_top", None)),
                     metadata.get("tube_nr", row.get("tube_nr", None)),
                 ]
@@ -641,7 +680,9 @@ class BROGrondwaterPlugin:
                 print(f"Style file not found: {qml_path}")
 
             self.dlg.progressBar.setValue(100)
-            filter_suffix = " with measurements" if only_with_measurements else ""
+            filter_suffix = (
+                " with measurements" if only_with_measurements else ""
+            )
             self.dlg.statusLabel.setText(
                 f"Retrieved {len(features)} wells{filter_suffix} "
                 f"(engine: {engine_used})"
@@ -661,7 +702,9 @@ class BROGrondwaterPlugin:
             )
 
         except Exception as e:
-            QMessageBox.critical(self.dlg, "Error", f"An error occurred:\n{str(e)}")
+            QMessageBox.critical(
+                self.dlg, "Error", f"An error occurred:\n{str(e)}"
+            )
             self.dlg.statusLabel.setText("Error occurred")
         finally:
             self._end_operation()
@@ -669,7 +712,9 @@ class BROGrondwaterPlugin:
     def apply_filter(self):
         """Apply depth filter to the wells layer."""
         if self.wells_layer is None:
-            QMessageBox.warning(self.dlg, "No Layer", "Please retrieve wells first.")
+            QMessageBox.warning(
+                self.dlg, "No Layer", "Please retrieve wells first."
+            )
             return
 
         try:
@@ -679,7 +724,8 @@ class BROGrondwaterPlugin:
             # Build filter expression
             if max_depth > min_depth:
                 filter_expr = (
-                    f'"screen_top" >= {min_depth} AND "screen_top" <= {max_depth}'
+                    f'"screen_top" >= {min_depth} '
+                    f'AND "screen_top" <= {max_depth}'
                 )
             else:
                 filter_expr = f'"screen_top" >= {min_depth}'
@@ -722,7 +768,9 @@ class BROGrondwaterPlugin:
         avoiding pyproj/PROJ conflicts with QGIS.
         """
         if self.wells_layer is None:
-            QMessageBox.warning(self.dlg, "No Layer", "Please retrieve wells first.")
+            QMessageBox.warning(
+                self.dlg, "No Layer", "Please retrieve wells first."
+            )
             return
 
         selected_features = self.wells_layer.selectedFeatures()
@@ -739,7 +787,9 @@ class BROGrondwaterPlugin:
         # Filter out already downloaded wells
         features_to_download = []
         for feature in selected_features:
-            cache_key = f"{feature['bro_id']}_{feature['tube_nr']}_{feature['name']}"
+            cache_key = (
+                f"{feature['bro_id']}_{feature['tube_nr']}_{feature['name']}"
+            )
             if cache_key not in self._downloaded_measurements:
                 features_to_download.append(
                     {
@@ -791,7 +841,9 @@ class BROGrondwaterPlugin:
 
             # Submit all downloads
             for feature_data in features_to_download:
-                future = self._executor.submit(self._download_single_well, feature_data)
+                future = self._executor.submit(
+                    self._download_single_well, feature_data
+                )
                 self._futures.append(future)
 
             # Start timer to poll for results
@@ -801,7 +853,9 @@ class BROGrondwaterPlugin:
 
         except Exception as e:
             QMessageBox.critical(
-                self.dlg, "Download Error", f"Error starting download:\n{str(e)}"
+                self.dlg,
+                "Download Error",
+                f"Error starting download:\n{str(e)}",
             )
             self._end_operation()
 
@@ -929,16 +983,19 @@ class BROGrondwaterPlugin:
                     self._downloaded_count += 1
                 else:
                     QgsMessageLog.logMessage(
-                        f"Download failed for {result.get('name', 'unknown')}: "
+                        "Download failed for "
+                        f"{result.get('name', 'unknown')}: "
                         f"{result.get('error', 'Unknown')}",
                         "BRO Grondwater",
-                        Qgis.Warning,
+                        Qgis.MessageLevel.Warning,
                     )
                     self._failures.append(result)
                     self._failed_count += 1
             except Exception as e:
                 QgsMessageLog.logMessage(
-                    f"Error processing result: {e}", "BRO Grondwater", Qgis.Warning
+                    f"Error processing result: {e}",
+                    "BRO Grondwater",
+                    Qgis.MessageLevel.Warning,
                 )
                 self._failures.append(
                     {"name": "unknown", "error": str(e), "reason": "error"}
@@ -999,13 +1056,16 @@ class BROGrondwaterPlugin:
         """Explain per reason which wells could not be downloaded."""
         by_reason = {}
         for failure in self._failures:
-            by_reason.setdefault(failure.get("reason", "error"), []).append(failure)
+            by_reason.setdefault(failure.get("reason", "error"), []).append(
+                failure
+            )
 
         sections = []
         for reason, failures in by_reason.items():
             label, explanation = DOWNLOAD_FAILURE_REASONS[reason]
             names = [
-                str(f.get("name") or f.get("bro_id") or "unknown") for f in failures
+                str(f.get("name") or f.get("bro_id") or "unknown")
+                for f in failures
             ]
             shown = ", ".join(names[:10])
             if len(names) > 10:
@@ -1016,7 +1076,8 @@ class BROGrondwaterPlugin:
         msg.setIcon(QMessageBox.Icon.Information)
         msg.setWindowTitle("Not all wells downloaded")
         msg.setText(
-            f"{len(self._failures)} of {self._expected_results} wells were not "
+            f"{len(self._failures)} of {self._expected_results} wells were "
+            "not "
             "downloaded:\n\n" + "\n\n".join(sections)
         )
         msg.setDetailedText(
@@ -1104,7 +1165,10 @@ class BROGrondwaterPlugin:
 
                 plot_widget.addItem(
                     pg.BarGraphItem(
-                        x=x, height=counts, width=bar_width * 0.9, brush="#0066cc"
+                        x=x,
+                        height=counts,
+                        width=bar_width * 0.9,
+                        brush="#0066cc",
                     )
                 )
 
@@ -1121,7 +1185,9 @@ class BROGrondwaterPlugin:
                         )
 
                 self.histogram_canvas = plot_widget
-                self.dlg.frameHistogram.layout().addWidget(self.histogram_canvas)
+                self.dlg.frameHistogram.layout().addWidget(
+                    self.histogram_canvas
+                )
 
             except Exception as e:
                 print(f"Histogram display unavailable: {e}")
@@ -1136,7 +1202,8 @@ class BROGrondwaterPlugin:
                 and filter_max > filter_min
             ):
                 self.wells_layer.setSubsetString(
-                    f'"screen_top" >= {filter_min} AND "screen_top" <= {filter_max}'
+                    f'"screen_top" >= {filter_min} AND "screen_top" <= '
+                    f"{filter_max}"
                 )
             else:
                 self.wells_layer.setSubsetString(saved_filter)
@@ -1180,7 +1247,9 @@ class BROGrondwaterPlugin:
         """Save the current plot as a PNG image."""
         from datetime import datetime
 
-        default_filename = f"BRO_GMW_plot_{datetime.now().strftime('%y%m%d')}.png"
+        default_filename = (
+            f"BRO_GMW_plot_{datetime.now().strftime('%y%m%d')}.png"
+        )
         downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
         if not os.path.exists(downloads_folder):
             downloads_folder = os.path.expanduser("~")
@@ -1191,13 +1260,17 @@ class BROGrondwaterPlugin:
         )
         if file_path:
             plot_widget.grab().save(file_path)
-            self.dlg.statusLabel.setText(f"Plot saved to {os.path.basename(file_path)}")
+            self.dlg.statusLabel.setText(
+                f"Plot saved to {os.path.basename(file_path)}"
+            )
 
     def plot_measurements(self):
         """Plot measurements for downloaded wells."""
         if len(self._downloaded_measurements) == 0:
             QMessageBox.warning(
-                self.dlg, "No Data", "Please download measurements first (step 4)."
+                self.dlg,
+                "No Data",
+                "Please download measurements first (step 4).",
             )
             return
 
@@ -1231,8 +1304,10 @@ class BROGrondwaterPlugin:
             plot_dialog.resize(800, 500)
             layout = QVBoxLayout()
 
-            # Time series plot with date axis. The measurement dates are naive and
-            # are converted to timestamps as if they were UTC (see below), so the
+            # Time series plot with date axis. The measurement dates are naive
+            # and
+            # are converted to timestamps as if they were UTC (see below), so
+            # the
             # axis must not shift them to local time either.
             date_axis = pg.DateAxisItem(orientation="bottom", utcOffset=0)
             plot_widget = pg.PlotWidget(axisItems={"bottom": date_axis})
@@ -1272,13 +1347,19 @@ class BROGrondwaterPlugin:
                     and series_data.get("values")
                 ):
                     gmw_match = re.search(r"GMW\d+", str(name) + str(bro_id))
-                    label = gmw_match.group(0) if gmw_match else (name or bro_id)
+                    label = (
+                        gmw_match.group(0) if gmw_match else (name or bro_id)
+                    )
 
-                    # Interpret naive dates as UTC: naive datetime.timestamp() asks
-                    # the OS for the local time, which fails on Windows for dates
+                    # Interpret naive dates as UTC: naive datetime.timestamp()
+                    # asks
+                    # the OS for the local time, which fails on Windows for
+                    # dates
                     # before 1970 ("[Errno 22] Invalid argument", issue #26).
                     timestamps = [
-                        dt.fromisoformat(d).replace(tzinfo=timezone.utc).timestamp()
+                        dt.fromisoformat(d)
+                        .replace(tzinfo=timezone.utc)
+                        .timestamp()
                         for d in series_data["dates"]
                     ]
                     values = series_data["values"]
@@ -1301,7 +1382,8 @@ class BROGrondwaterPlugin:
                 QMessageBox.warning(
                     self.dlg,
                     "No Data",
-                    "No numeric measurement data found for the selected wells.",
+                    "No numeric measurement data found for the selected "
+                    "wells.",
                 )
                 self.dlg.statusLabel.setText("Ready")
                 return
@@ -1362,7 +1444,9 @@ class BROGrondwaterPlugin:
             plot_dialog.setLayout(layout)
 
             self.dlg.progressBar.setValue(100)
-            self.dlg.statusLabel.setText(f"Plot created ({plotted_count} wells)")
+            self.dlg.statusLabel.setText(
+                f"Plot created ({plotted_count} wells)"
+            )
             plot_dialog.exec()
 
         except Exception as e:
@@ -1379,14 +1463,18 @@ class BROGrondwaterPlugin:
         """
         if len(self._downloaded_measurements) == 0:
             QMessageBox.warning(
-                self.dlg, "No Data", "Please download measurements first (step 4)."
+                self.dlg,
+                "No Data",
+                "Please download measurements first (step 4).",
             )
             return
 
         # Generate default filename with date and time to avoid overwriting
         from datetime import datetime
 
-        default_filename = f"BRO_GMW_{datetime.now().strftime('%y%m%d_%H%M%S')}.xlsx"
+        default_filename = (
+            f"BRO_GMW_{datetime.now().strftime('%y%m%d_%H%M%S')}.xlsx"
+        )
 
         # Get Downloads folder
         downloads_folder = os.path.join(os.path.expanduser("~"), "Downloads")
@@ -1425,14 +1513,21 @@ class BROGrondwaterPlugin:
             workbook = xlsxwriter.Workbook(file_path)
 
             # Add formats
-            header_format = workbook.add_format({"bold": True, "bg_color": "#D9E1F2"})
-            date_format = workbook.add_format({"num_format": "yyyy-mm-dd hh:mm:ss"})
+            header_format = workbook.add_format(
+                {"bold": True, "bg_color": "#D9E1F2"}
+            )
+            date_format = workbook.add_format(
+                {"num_format": "yyyy-mm-dd hh:mm:ss"}
+            )
 
             # Collect all series data first
             all_series_data = {}  # For chart: {gmw_id: (dates, values)}
             metadata_list = []
 
-            for cache_key, measurement in self._downloaded_measurements.items():
+            for (
+                cache_key,
+                measurement,
+            ) in self._downloaded_measurements.items():
                 series_data = measurement.get("data", {})
                 metadata = series_data.get("metadata", {})
                 name = measurement["name"]
@@ -1451,7 +1546,9 @@ class BROGrondwaterPlugin:
                         "GMW ID": gmw_id,
                         "Name": name,
                         "BRO ID": bro_id,
-                        "Tube Nr": metadata.get("tube_nr", measurement["tube_nr"]),
+                        "Tube Nr": metadata.get(
+                            "tube_nr", measurement["tube_nr"]
+                        ),
                         "X (RD)": metadata.get("x"),
                         "Y (RD)": metadata.get("y"),
                         "Surface Level (m NAP)": metadata.get("ground_level"),
@@ -1464,7 +1561,8 @@ class BROGrondwaterPlugin:
                     }
                 )
 
-                # Collect series data for chart (use 'name' as series identifier)
+                # Collect series data for chart (use 'name' as series
+                # identifier)
                 if (
                     series_data
                     and series_data.get("dates")
@@ -1544,7 +1642,8 @@ class BROGrondwaterPlugin:
 
                 # Build and write data rows efficiently
                 for row, date in enumerate(all_dates, 1):
-                    # Write date with explicit format (write_row doesn't apply formats)
+                    # Write date with explicit format (write_row doesn't apply
+                    # formats)
                     data_ws.write_datetime(row, 0, date, date_format)
                     # Write values for each series
                     for col, gmw_id in enumerate(gmw_ids, 1):
@@ -1554,11 +1653,13 @@ class BROGrondwaterPlugin:
 
                 # Set column width for date column
                 data_ws.set_column(0, 0, 20)
-                # Set data column widths based on header length (names can be long)
+                # Set data column widths based on header length (names can be
+                # long)
                 for col, series_id in enumerate(gmw_ids, 1):
                     data_ws.set_column(col, col, max(len(series_id) + 2, 18))
 
-                # Create chart with show_blanks_as='span' to connect across gaps
+                # Create chart with show_blanks_as='span' to connect across
+                # gaps
                 chart = workbook.add_chart({"type": "line"})
                 chart.show_blanks_as(
                     "span"
@@ -1581,14 +1682,16 @@ class BROGrondwaterPlugin:
                     {
                         "name": "Datum",
                         "date_axis": True,
-                        "label_position": "low",  # Labels at bottom of plot area
+                        # Labels at bottom of plot area
+                        "label_position": "low",
                         "num_format": "dd-mm-yyyy",
                     }
                 )
                 chart.set_y_axis(
                     {
                         "name": "Stijghoogte (m NAP)",
-                        "crossing": "min",  # X-axis crosses at y-minimum, not at y=0
+                        # X-axis crosses at y-minimum, not at y=0
+                        "crossing": "min",
                     }
                 )
                 chart.set_legend({"position": "bottom"})  # Legend below chart
@@ -1610,15 +1713,20 @@ class BROGrondwaterPlugin:
                 "Data source: BRO (Basisregistratie Ondergrond)",
                 "",
                 "DISCLAIMER",
-                'This software is provided "as is", without warranty of any kind, '
+                'This software is provided "as is", without warranty of any '
+                "kind, "
                 "express or implied,",
-                "including but not limited to the warranties of merchantability, "
+                "including but not limited to the warranties of "
+                "merchantability, "
                 "fitness for a particular",
-                "purpose and noninfringement. In no event shall the authors or "
+                "purpose and noninfringement. In no event shall the authors "
+                "or "
                 "copyright holders be liable",
-                "for any claim, damages or other liability, whether in an action of "
+                "for any claim, damages or other liability, whether in an "
+                "action of "
                 "contract, tort or otherwise,",
-                "arising from, out of or in connection with the software or the use "
+                "arising from, out of or in connection with the software or "
+                "the use "
                 "or other dealings in the software.",
             ]
             for row, text in enumerate(credits_text):
@@ -1630,7 +1738,8 @@ class BROGrondwaterPlugin:
 
             self.dlg.progressBar.setValue(100)
             self.dlg.statusLabel.setText(
-                f"Exported {exported_count} wells to {os.path.basename(file_path)}"
+                f"Exported {exported_count} wells to "
+                f"{os.path.basename(file_path)}"
             )
             QMessageBox.information(
                 self.dlg,
@@ -1639,23 +1748,29 @@ class BROGrondwaterPlugin:
                 f"Exported measurements for {exported_count} wells.",
             )
 
-            # Open the Excel file with the default application. QDesktopServices
+            # Open the Excel file with the default application.
+            # QDesktopServices
             # works on all platforms without starting processes ourselves.
             if not QDesktopServices.openUrl(QUrl.fromLocalFile(file_path)):
                 QgsMessageLog.logMessage(
-                    f"Could not open {file_path}", "BRO Grondwater", Qgis.Warning
+                    f"Could not open {file_path}",
+                    "BRO Grondwater",
+                    Qgis.MessageLevel.Warning,
                 )
 
         except ImportError:
             QMessageBox.critical(
                 self.dlg,
                 "Import Error",
-                "xlsxwriter is required for Excel export. Please install it using:\n"
+                "xlsxwriter is required for Excel export. Please install it "
+                "using:\n"
                 "pip install xlsxwriter",
             )
         except Exception as e:
             QMessageBox.critical(
-                self.dlg, "Export Error", f"Error exporting to Excel:\n{str(e)}"
+                self.dlg,
+                "Export Error",
+                f"Error exporting to Excel:\n{str(e)}",
             )
         finally:
             self._end_operation()
