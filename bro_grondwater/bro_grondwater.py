@@ -13,7 +13,7 @@ if sys.stderr is None:
 
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor
 from qgis.PyQt.QtCore import QSettings, QTranslator, QCoreApplication, Qt, QTimer
 from qgis.PyQt.QtGui import QIcon
 from qgis.PyQt.QtWidgets import QAction, QFileDialog, QMessageBox, QDockWidget
@@ -27,7 +27,6 @@ from qgis.core import (
     QgsField,
     QgsCoordinateReferenceSystem,
     QgsCoordinateTransform,
-    QgsRectangle,
     QgsMessageLog,
     Qgis,
 )
@@ -167,7 +166,8 @@ class BROGrondwaterPlugin:
         self.obs_collection = None
         self.engine_used = None
         self._cancelled = False
-        self._downloaded_measurements = {}  # Cache for downloaded measurements {cache_key: data}
+        # Cache for downloaded measurements {cache_key: data}
+        self._downloaded_measurements = {}
 
         # ThreadPoolExecutor for background downloads
         self._executor = None
@@ -266,7 +266,8 @@ class BROGrondwaterPlugin:
                 | Qt.DockWidgetArea.RightDockWidgetArea
             )
 
-            # Add to QGIS interface on the right side (can be docked alongside Processing Toolbox)
+            # Add to QGIS interface on the right side (can be docked alongside
+            # Processing Toolbox)
             self.iface.addDockWidget(
                 Qt.DockWidgetArea.RightDockWidgetArea, self.dock_widget
             )
@@ -305,7 +306,8 @@ class BROGrondwaterPlugin:
                 "layers=gm_gmw&"
                 "styles=default&"
                 "format=image/png&"
-                "url=https://service.pdok.nl/bzk/bro-gminsamenhang-karakteristieken/wms/v1_0?"
+                "url=https://service.pdok.nl/bzk/"
+                "bro-gminsamenhang-karakteristieken/wms/v1_0?"
                 "request=GetCapabilities&service=WMS"
             )
 
@@ -359,7 +361,8 @@ class BROGrondwaterPlugin:
                 "layers=grijs&"
                 "styles=default&"
                 "tileMatrixSet=EPSG:28992&"
-                "url=https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?request%3DGetCapabilities%26service%3DWMTS"
+                "url=https://service.pdok.nl/brt/achtergrondkaart/wmts/v2_0?"
+                "request%3DGetCapabilities%26service%3DWMTS"
             )
 
             # Create layer using QgsRasterLayer with wms provider
@@ -483,7 +486,8 @@ class BROGrondwaterPlugin:
 
             # Retrieve observations using hydropandas
             # Use read_bro for extent-based queries (returns ObsCollection)
-            # Use only_metadata=True for fast initial retrieval (measurements loaded on-demand)
+            # Use only_metadata=True for fast initial retrieval (measurements loaded
+            # on-demand)
             # Try brodata engine first (faster), fall back to default if not available
             engine_used = None
             try:
@@ -632,7 +636,8 @@ class BROGrondwaterPlugin:
             self.dlg.progressBar.setValue(100)
             filter_suffix = " with measurements" if only_with_measurements else ""
             self.dlg.statusLabel.setText(
-                f"Retrieved {len(features)} wells{filter_suffix} (engine: {engine_used})"
+                f"Retrieved {len(features)} wells{filter_suffix} "
+                f"(engine: {engine_used})"
             )
 
             # Store observation collection for later use
@@ -748,10 +753,12 @@ class BROGrondwaterPlugin:
             reply = QMessageBox.warning(
                 self.dlg,
                 "Large Download",
-                f"You are about to download measurements for {len(features_to_download)} wells.\n\n"
+                "You are about to download measurements for "
+                f"{len(features_to_download)} wells.\n\n"
                 "This may take a long time. Consider selecting fewer wells or "
                 "applying a filter first.\n\n"
-                f"Do you want to download the timeseries for all {len(features_to_download)} wells anyway?",
+                "Do you want to download the timeseries for all "
+                f"{len(features_to_download)} wells anyway?",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
                 QMessageBox.StandardButton.No,
             )
@@ -915,7 +922,8 @@ class BROGrondwaterPlugin:
                     self._downloaded_count += 1
                 else:
                     QgsMessageLog.logMessage(
-                        f"Download failed for {result.get('name', 'unknown')}: {result.get('error', 'Unknown')}",
+                        f"Download failed for {result.get('name', 'unknown')}: "
+                        f"{result.get('error', 'Unknown')}",
                         "BRO Grondwater",
                         Qgis.Warning,
                     )
@@ -965,12 +973,9 @@ class BROGrondwaterPlugin:
             for failure in self._failures:
                 reason = failure.get("reason", "error")
                 reason_counts[reason] = reason_counts.get(reason, 0) + 1
-            status_msg += (
-                f", {failed_count} not downloaded: "
-                + ", ".join(
-                    f"{count} {DOWNLOAD_FAILURE_REASONS[reason][0]}"
-                    for reason, count in reason_counts.items()
-                )
+            status_msg += f", {failed_count} not downloaded: " + ", ".join(
+                f"{count} {DOWNLOAD_FAILURE_REASONS[reason][0]}"
+                for reason, count in reason_counts.items()
             )
         self.dlg.labelDownloadStatus.setText(status_msg)
         self.dlg.labelDownloadStatus.setStyleSheet(
@@ -1203,7 +1208,7 @@ class BROGrondwaterPlugin:
                     if vals.notna().any():
                         mask = ~np.isnan(vals)
                         return obs.index[mask], vals[mask]
-                except:
+                except Exception:
                     continue
 
         # Last resort: try obs.values directly but filter non-numeric
@@ -1211,7 +1216,7 @@ class BROGrondwaterPlugin:
             vals = pd.to_numeric(pd.Series(obs.values), errors="coerce")
             mask = ~np.isnan(vals)
             return obs.index[mask], vals.values[mask]
-        except:
+        except Exception:
             return None, None
 
     def _save_plot(self, plot_widget):
@@ -1262,7 +1267,6 @@ class BROGrondwaterPlugin:
                 QToolButton,
                 QButtonGroup,
             )
-            from qgis.PyQt.QtCore import QSize
 
             # Create plot dialog
             plot_dialog = QDialog(self.dlg)
@@ -1412,7 +1416,10 @@ class BROGrondwaterPlugin:
             self._end_operation()
 
     def export_to_excel(self):
-        """Export downloaded measurements to Excel using xlsxwriter for proper chart support."""
+        """Export downloaded measurements to Excel.
+
+        Uses xlsxwriter for proper chart support.
+        """
         if len(self._downloaded_measurements) == 0:
             QMessageBox.warning(
                 self.dlg, "No Data", "Please download measurements first (step 4)."
@@ -1646,11 +1653,16 @@ class BROGrondwaterPlugin:
                 "Data source: BRO (Basisregistratie Ondergrond)",
                 "",
                 "DISCLAIMER",
-                'This software is provided "as is", without warranty of any kind, express or implied,',
-                "including but not limited to the warranties of merchantability, fitness for a particular",
-                "purpose and noninfringement. In no event shall the authors or copyright holders be liable",
-                "for any claim, damages or other liability, whether in an action of contract, tort or otherwise,",
-                "arising from, out of or in connection with the software or the use or other dealings in the software.",
+                'This software is provided "as is", without warranty of any kind, '
+                "express or implied,",
+                "including but not limited to the warranties of merchantability, "
+                "fitness for a particular",
+                "purpose and noninfringement. In no event shall the authors or "
+                "copyright holders be liable",
+                "for any claim, damages or other liability, whether in an action of "
+                "contract, tort or otherwise,",
+                "arising from, out of or in connection with the software or the use "
+                "or other dealings in the software.",
             ]
             for row, text in enumerate(credits_text):
                 credits_ws.write(row, 0, text)
