@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned
+- Additional filter options (multiple depth ranges, quality flags)
+- Custom map styling options
+- CSV export format
+- Batch export functionality
+- Advanced plotting options (multiple y-axes, custom date ranges)
+- Integration with other BRO datasets
+
+## [0.3.0] - 2026-10-07
+
 ### Added
 - "Only locations with measurements" checkbox next to "Retrieve Wells from Current Extent". When checked, monitoring tubes without a groundwater level dossier (GLD) with measurements are filtered out. Which tubes have measurements is looked up in the PDOK "GM in samenhang - karakteristieken" index, so retrieval stays metadata-only and no measurements are downloaded (#17).
 
@@ -21,14 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 - The plugin's dependency installer now also upgrades packages that are installed but older than their minimum version. Raised minimums to avoid versions with known vulnerabilities: requests>=2.33.0, urllib3>=2.8.0, idna>=3.15, certifi>=2024.7.4, tqdm>=4.66.3. Compiled packages that ship with QGIS (numpy, pillow, lxml) are not upgraded by the plugin (#25).
-
-### Planned
-- Additional filter options (multiple depth ranges, quality flags)
-- Custom map styling options
-- CSV export format
-- Batch export functionality
-- Advanced plotting options (multiple y-axes, custom date ranges)
-- Integration with other BRO datasets
 
 ## [0.1] - 2024-12-18
 
