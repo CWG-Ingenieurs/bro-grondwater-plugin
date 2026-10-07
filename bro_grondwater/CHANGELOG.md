@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - "Error creating plot: [Errno 22] Invalid argument" on Windows when a plotted series contains measurements from before 1970. Measurement dates are now converted to plot timestamps as UTC instead of via the OS local-time conversion, which on Windows does not support pre-1970 dates (#26).
+- `AttributeError: type object 'QMessageBox' has no attribute 'Yes'` when confirming a download of more than 20 wells. QGIS 4 uses PyQt6, which requires the fully-scoped `QMessageBox.StandardButton.Yes`/`.No` instead of the flat `QMessageBox.Yes`/`.No` shortcuts PyQt5 allowed (#18).
 
 ### Planned
 - Additional filter options (multiple depth ranges, quality flags)
