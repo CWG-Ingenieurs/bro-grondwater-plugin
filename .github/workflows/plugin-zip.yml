@@ -1,0 +1,79 @@
+# Builds the ZIP that is uploaded to plugins.qgis.org: a single top-level
+# folder "bro_grondwater" containing the plugin files. GitHub's own "Source
+# code (zip)" can't be used for that, because it wraps everything in a
+# "<repo>-<tag>" folder.
+#
+# - On a published GitHub release, the ZIP is attached to the release as
+#   bro_grondwater-<version>.zip. The release tag (e.g. v0.2.4) must match
+#   version= in bro_grondwater/metadata.txt.
+# - On pull requests that change the plugin, and with "Run workflow" on the
+#   Actions tab, the ZIP is built and made available as a workflow artifact,
+#   e.g. to test it in QGIS before releasing.
+#
+# Files are excluded from the ZIP with export-ignore in .gitattributes.
+
+name: Plugin ZIP
+
+on:
+  release:
+    types: [published]
+  pull_request:
+    paths:
+      - "bro_grondwater/**"
+      - ".gitattributes"
+      - ".github/workflows/plugin-zip.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed to attach the ZIP to a release
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read plugin version
+        id: version
+        run: |
+          version=$(grep -Po '^version=\K.*' bro_grondwater/metadata.txt | tr -d '\r')
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "Plugin version: $version"
+
+      - name: Check that the release tag matches the plugin version
+        if: github.event_name == 'release'
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          if [ "${TAG#v}" != "$VERSION" ]; then
+            echo "::error::Release tag $TAG does not match version=$VERSION in bro_grondwater/metadata.txt"
+            exit 1
+          fi
+
+      - name: Build ZIP
+        env:
+          ZIP: bro_grondwater-${{ steps.version.outputs.version }}.zip
+        run: |
+          git archive --format=zip -o "$ZIP" HEAD bro_grondwater
+          unzip -l "$ZIP"
+          echo "ZIP=$ZIP" >> "$GITHUB_ENV"
+
+      - name: Upload as workflow artifact
+        uses: actions/upload-artifact@v7
+        with:
+          # Upload the ZIP as is (not zipped again); with archive: false the
+          # artifact name is the downloaded file name
+          name: ${{ env.ZIP }}
+          path: ${{ env.ZIP }}
+          archive: false
+
+      - name: Attach to GitHub release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$TAG" "$ZIP" --clobber

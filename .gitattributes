@@ -1,0 +1,4 @@
+# Files excluded from the plugin ZIP built by .github/workflows/plugin-zip.yml
+# (git archive). They stay in the repository.
+bro_grondwater/.gitignore export-ignore
+bro_grondwater/.github export-ignore
