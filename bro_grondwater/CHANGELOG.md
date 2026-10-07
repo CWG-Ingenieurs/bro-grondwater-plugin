@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - "Only locations with measurements" checkbox next to "Retrieve Wells from Current Extent". When checked, monitoring tubes without a groundwater level dossier (GLD) with measurements are filtered out. Which tubes have measurements is looked up in the PDOK "GM in samenhang - karakteristieken" index, so retrieval stays metadata-only and no measurements are downloaded (#17).
 
+### Fixed
+- `AttributeError: type object 'QMessageBox' has no attribute 'Yes'` when confirming a download of more than 20 wells. QGIS 4 uses PyQt6, which requires the fully-scoped `QMessageBox.StandardButton.Yes`/`.No` instead of the flat `QMessageBox.Yes`/`.No` shortcuts PyQt5 allowed (#18).
+
 ### Planned
 - Additional filter options (multiple depth ranges, quality flags)
 - Custom map styling options
