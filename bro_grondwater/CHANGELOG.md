@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Advanced plotting options (multiple y-axes, custom date ranges)
 - Integration with other BRO datasets
 
-## [0.3.0] - 2026-10-07
+## [0.2.3] - 2026-10-07
 
 ### Added
 - "Only locations with measurements" checkbox next to "Retrieve Wells from Current Extent". When checked, monitoring tubes without a groundwater level dossier (GLD) with measurements are filtered out. Which tubes have measurements is looked up in the PDOK "GM in samenhang - karakteristieken" index, so retrieval stays metadata-only and no measurements are downloaded (#17).
